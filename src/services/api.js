@@ -131,22 +131,11 @@ export const animeAPI = {
     return apiCall(`/anime/${animeId}/episodes`);
   },
 
-  createEpisode: async (animeId, formData) => {
-    const token = getToken();
-    const response = await fetch(`${API_BASE_URL}/anime/${animeId}/episodes`, {
+  createEpisode: async (animeId, data) => {
+    return apiCall(`/anime/${animeId}/episodes`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
+      body: JSON.stringify(data),
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create episode');
-    }
-
-    return response.json();
   },
 
   getReviews: async (animeId) => {

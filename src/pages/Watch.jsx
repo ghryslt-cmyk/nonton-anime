@@ -1,5 +1,5 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom'
-import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart, Share2 } from 'lucide-react'
+import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart, Share2, Send } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { animeAPI, authAPI } from '../services/api'
 
@@ -36,6 +36,9 @@ export default function Watch() {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(1440) // 24 minutes in seconds
   const videoRef = useRef(null)
+  const [comments, setComments] = useState([])
+  const [newComment, setNewComment] = useState('')
+  const [submittingComment, setSubmittingComment] = useState(false)
 
   useEffect(() => {
     loadAnime()
@@ -59,6 +62,9 @@ export default function Watch() {
         setCurrentEpisode(episodesData[0])
       }
       console.log('Current episode:', episodesData[0])
+
+      // Load comments for current episode
+      loadComments()
     } catch (err) {
       console.error('Failed to load anime:', err)
       // Fallback to mock data if API fails
@@ -69,6 +75,54 @@ export default function Watch() {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadComments = () => {
+    // Load comments from localStorage for this episode
+    const episodeKey = `comments_${id}_${currentEpisode?.id || 1}`
+    const savedComments = localStorage.getItem(episodeKey)
+    if (savedComments) {
+      setComments(JSON.parse(savedComments))
+    }
+  }
+
+  const handleSubmitComment = (e) => {
+    e.preventDefault()
+    const user = authAPI.getCurrentUser()
+    if (!user) {
+      alert('Please login to comment')
+      return
+    }
+
+    if (!newComment.trim()) {
+      alert('Please enter a comment')
+      return
+    }
+
+    setSubmittingComment(true)
+    try {
+      const comment = {
+        id: Date.now(),
+        user_name: user.name || user.email,
+        comment: newComment,
+        created_at: new Date().toISOString()
+      }
+
+      const updatedComments = [...comments, comment]
+      setComments(updatedComments)
+
+      // Save to localStorage
+      const episodeKey = `comments_${id}_${currentEpisode?.id || 1}`
+      localStorage.setItem(episodeKey, JSON.stringify(updatedComments))
+
+      setNewComment('')
+      alert('Comment added successfully!')
+    } catch (err) {
+      console.error('Failed to add comment:', err)
+      alert('Failed to add comment')
+    } finally {
+      setSubmittingComment(false)
     }
   }
 
@@ -167,57 +221,59 @@ export default function Watch() {
           </div>
         )}
 
-        {/* Controls */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-          {/* Progress Bar */}
-          <div className="mb-4">
-            <div className="h-1 bg-slate-600 rounded-full cursor-pointer" onClick={handleSeek}>
-              <div 
-                className="h-full bg-teal-500 rounded-full relative"
-                style={{ width: `${progress}%` }}
-              >
-                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full" />
+        {/* Controls - Only show for direct video files, not YouTube/Vimeo */}
+        {currentEpisode && currentEpisode.video_platform === 'other' && (
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+            {/* Progress Bar */}
+            <div className="mb-4">
+              <div className="h-1 bg-slate-600 rounded-full cursor-pointer" onClick={handleSeek}>
+                <div
+                  className="h-full bg-teal-500 rounded-full relative"
+                  style={{ width: `${progress}%` }}
+                >
+                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full" />
+                </div>
+              </div>
+              <div className="flex justify-between text-sm text-gray-300 mt-2">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
               </div>
             </div>
-            <div className="flex justify-between text-sm text-gray-300 mt-2">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
+
+            {/* Control Buttons */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="p-2 hover:bg-white/10 rounded-full transition"
+                >
+                  {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+                </button>
+                <button className="p-2 hover:bg-white/10 rounded-full transition">
+                  <SkipBack className="w-6 h-6" />
+                </button>
+                <button className="p-2 hover:bg-white/10 rounded-full transition">
+                  <SkipForward className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="p-2 hover:bg-white/10 rounded-full transition"
+                >
+                  <Volume2 className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button className="p-2 hover:bg-white/10 rounded-full transition">
+                  <Settings className="w-6 h-6" />
+                </button>
+                <button className="p-2 hover:bg-white/10 rounded-full transition">
+                  <Maximize className="w-6 h-6" />
+                </button>
+              </div>
             </div>
           </div>
-
-          {/* Control Buttons */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="p-2 hover:bg-white/10 rounded-full transition"
-              >
-                {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-              </button>
-              <button className="p-2 hover:bg-white/10 rounded-full transition">
-                <SkipBack className="w-6 h-6" />
-              </button>
-              <button className="p-2 hover:bg-white/10 rounded-full transition">
-                <SkipForward className="w-6 h-6" />
-              </button>
-              <button
-                onClick={() => setIsMuted(!isMuted)}
-                className="p-2 hover:bg-white/10 rounded-full transition"
-              >
-                <Volume2 className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-white/10 rounded-full transition">
-                <Settings className="w-6 h-6" />
-              </button>
-              <button className="p-2 hover:bg-white/10 rounded-full transition">
-                <Maximize className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Video Info */}
@@ -298,25 +354,53 @@ export default function Watch() {
 
             <div className="bg-slate-800 rounded-lg p-6">
               <h3 className="text-xl font-bold mb-4">Comments</h3>
-              <div className="space-y-4">
+              
+              {/* Comment Form */}
+              <form onSubmit={handleSubmitComment} className="mb-6">
                 <div className="flex gap-3">
                   <div className="w-10 h-10 bg-teal-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
-                    U
+                    {authAPI.getCurrentUser()?.name?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-sm">User123</p>
-                    <p className="text-sm text-gray-400 mt-1">This episode was amazing! Can't wait for the next one.</p>
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                      rows="2"
+                    />
+                    <button
+                      type="submit"
+                      disabled={submittingComment}
+                      className="mt-2 flex items-center gap-2 bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg transition disabled:opacity-50"
+                    >
+                      <Send className="w-4 h-4" />
+                      {submittingComment ? 'Posting...' : 'Post Comment'}
+                    </button>
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  <div className="w-10 h-10 bg-cyan-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
-                    A
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm">AnimeFan</p>
-                    <p className="text-sm text-gray-400 mt-1">The animation quality is incredible!</p>
-                  </div>
-                </div>
+              </form>
+
+              {/* Comments List */}
+              <div className="space-y-4">
+                {comments.length > 0 ? (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="flex gap-3">
+                      <div className="w-10 h-10 bg-teal-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
+                        {comment.user_name?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{comment.user_name}</p>
+                        <p className="text-sm text-gray-400 mt-1">{comment.comment}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(comment.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-center py-4 text-sm">No comments yet. Be the first to comment!</p>
+                )}
               </div>
             </div>
           </div>

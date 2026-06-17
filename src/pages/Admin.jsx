@@ -136,9 +136,11 @@ export default function Admin() {
 
     try {
       await animeAPI.delete(id)
+      alert('Anime deleted successfully!')
       loadAnimeList()
     } catch (err) {
-      alert('Failed to delete anime')
+      alert('Failed to delete anime: ' + (err.message || 'Unknown error'))
+      console.error('Delete error:', err)
     }
   }
 
@@ -155,7 +157,7 @@ export default function Admin() {
         video_url: episodeForm.video_url,
         video_platform: episodeForm.video_platform
       }
-      await animeAPI.createEpisode(animeId, JSON.stringify(data))
+      await animeAPI.createEpisode(animeId, data)
       alert('Episode added successfully!')
       setEpisodeForm({
         episode_number: '',
@@ -197,27 +199,6 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      {/* Admin Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-4 md:px-6 py-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2">
-            <Feather className="w-6 md:w-8 h-6 md:h-8 text-teal-400" />
-            <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
-              WorldEnd Admin
-            </span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/profile" className="text-sm md:text-base text-gray-300 hover:text-white transition">
-              Profile
-            </Link>
-            <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-3 md:px-4 py-2 rounded-lg transition text-sm md:text-base">
-              <LogOut className="w-4 h-4 md:w-5 h-5" />
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar */}
