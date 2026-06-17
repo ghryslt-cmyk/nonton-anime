@@ -1,5 +1,5 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom'
-import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart } from 'lucide-react'
+import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart, Share2 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { animeAPI, authAPI } from '../services/api'
 
