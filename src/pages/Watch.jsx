@@ -1,0 +1,327 @@
+import { useParams, Link, useSearchParams } from 'react-router-dom'
+import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { animeAPI, authAPI } from '../services/api'
+
+// Helper function to extract YouTube video ID
+const getYouTubeId = (url) => {
+  if (!url) return null
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  const videoId = (match && match[2].length === 11) ? match[2] : null
+  console.log('YouTube URL:', url, 'Extracted ID:', videoId)
+  return videoId
+}
+
+// Helper function to extract Vimeo video ID
+const getVimeoId = (url) => {
+  if (!url) return null
+  const regExp = /vimeo\.com\/(\d+)/
+  const match = url.match(regExp)
+  const videoId = match ? match[1] : null
+  console.log('Vimeo URL:', url, 'Extracted ID:', videoId)
+  return videoId
+}
+
+export default function Watch() {
+  const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const episodeId = searchParams.get('episode')
+  const [anime, setAnime] = useState(null)
+  const [episodes, setEpisodes] = useState([])
+  const [currentEpisode, setCurrentEpisode] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(1440) // 24 minutes in seconds
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    loadAnime()
+  }, [id, episodeId])
+
+  const loadAnime = async () => {
+    try {
+      const [animeData, episodesData] = await Promise.all([
+        animeAPI.getById(id),
+        animeAPI.getEpisodes(id)
+      ])
+      setAnime(animeData)
+      setEpisodes(episodesData)
+      console.log('Episodes loaded:', episodesData)
+
+      // Set current episode
+      if (episodeId) {
+        const episode = episodesData.find(e => e.id === parseInt(episodeId))
+        setCurrentEpisode(episode || episodesData[0])
+      } else {
+        setCurrentEpisode(episodesData[0])
+      }
+      console.log('Current episode:', episodesData[0])
+    } catch (err) {
+      console.error('Failed to load anime:', err)
+      // Fallback to mock data if API fails
+      const { animeData: mockData } = await import('../data/animeData')
+      const mockAnime = mockData.find(a => a.id === parseInt(id))
+      if (mockAnime) {
+        setAnime(mockAnime)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause()
+      } else {
+        videoRef.current.play()
+      }
+      setIsPlaying(!isPlaying)
+    }
+  }
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime)
+    }
+  }
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration)
+    }
+  }
+
+  const handleSeek = (e) => {
+    const progressBar = e.currentTarget
+    const clickPosition = (e.clientX - progressBar.getBoundingClientRect().left) / progressBar.offsetWidth
+    if (videoRef.current) {
+      videoRef.current.currentTime = clickPosition * duration
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center py-20">Loading...</div>
+  }
+
+  if (!anime) {
+    return <div className="text-center py-20">Anime not found</div>
+  }
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const progress = (currentTime / duration) * 100
+
+  return (
+    <div className="min-h-screen bg-gray-900">
+      {/* Video Player */}
+      <div className="relative bg-black aspect-video">
+        {currentEpisode && currentEpisode.video_url ? (
+          currentEpisode.video_platform === 'youtube' ? (
+            <iframe
+              className="w-full h-full"
+              src={`https://www.youtube.com/embed/${getYouTubeId(currentEpisode.video_url)}?autoplay=1`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : currentEpisode.video_platform === 'vimeo' ? (
+            <iframe
+              className="w-full h-full"
+              src={`https://player.vimeo.com/video/${getVimeoId(currentEpisode.video_url)}?autoplay=1`}
+              title="Vimeo video player"
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              src={currentEpisode.video_url}
+              className="w-full h-full"
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              controls
+            />
+          )
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+            <div className="text-center">
+              <div className="w-24 h-24 bg-teal-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Play className="w-12 h-12 text-teal-500" />
+              </div>
+              <p className="text-gray-400">Video Player Placeholder</p>
+              <p className="text-sm text-gray-500 mt-2">{anime.title} - Episode {currentEpisode?.episode_number || 1}</p>
+              <p className="text-xs text-gray-500 mt-2">Debug: video_url={currentEpisode?.video_url}, platform={currentEpisode?.video_platform}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Controls */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+          {/* Progress Bar */}
+          <div className="mb-4">
+            <div className="h-1 bg-slate-600 rounded-full cursor-pointer" onClick={handleSeek}>
+              <div 
+                className="h-full bg-teal-500 rounded-full relative"
+                style={{ width: `${progress}%` }}
+              >
+                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full" />
+              </div>
+            </div>
+            <div className="flex justify-between text-sm text-gray-300 mt-2">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          {/* Control Buttons */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="p-2 hover:bg-white/10 rounded-full transition"
+              >
+                {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+              </button>
+              <button className="p-2 hover:bg-white/10 rounded-full transition">
+                <SkipBack className="w-6 h-6" />
+              </button>
+              <button className="p-2 hover:bg-white/10 rounded-full transition">
+                <SkipForward className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => setIsMuted(!isMuted)}
+                className="p-2 hover:bg-white/10 rounded-full transition"
+              >
+                <Volume2 className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button className="p-2 hover:bg-white/10 rounded-full transition">
+                <Settings className="w-6 h-6" />
+              </button>
+              <button className="p-2 hover:bg-white/10 rounded-full transition">
+                <Maximize className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Video Info */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <Link to={`/anime/${anime.id}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-4 transition">
+          <ArrowLeft className="w-5 h-5" />
+          Back to Details
+        </Link>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            <h1 className="text-3xl font-bold mb-2">{anime.title}</h1>
+            <p className="text-gray-400 mb-6">Episode 1 - {anime.description}</p>
+
+            <div className="flex gap-4 mb-8">
+              <button className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 px-6 py-3 rounded-lg transition">
+                <Heart className="w-5 h-5" />
+                Add to Favorites
+              </button>
+              <button className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-lg transition">
+                <Share2 className="w-5 h-5" />
+                Share
+              </button>
+            </div>
+
+            {/* Episode List */}
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Episodes</h2>
+              <div className="space-y-2">
+                {episodes.length > 0 ? (
+                  episodes.map((episode) => (
+                    <Link
+                      key={episode.id}
+                      to={`/watch/${anime.id}?episode=${episode.id}`}
+                      className={`w-full flex items-center gap-4 p-4 rounded-lg transition ${
+                        currentEpisode?.id === episode.id ? 'bg-teal-600' : 'bg-slate-800 hover:bg-slate-700'
+                      }`}
+                    >
+                      <Play className="w-5 h-5" />
+                      <div className="flex-1 text-left">
+                        <p className="font-semibold">Episode {episode.episode_number}</p>
+                        <p className="text-sm text-gray-400">{episode.title || `Episode ${episode.episode_number}`}</p>
+                      </div>
+                      {currentEpisode?.id === episode.id && <span className="text-sm bg-white/20 px-2 py-1 rounded">Now Playing</span>}
+                    </Link>
+                  ))
+                ) : (
+                  Array.from({ length: Math.min(anime.episodes || 12, 10) }, (_, i) => (
+                    <Link
+                      key={i + 1}
+                      to={`/watch/${anime.id}`}
+                      className={`w-full flex items-center gap-4 p-4 rounded-lg transition ${
+                        i === 0 ? 'bg-teal-600' : 'bg-slate-800 hover:bg-slate-700'
+                      }`}
+                    >
+                      <Play className="w-5 h-5" />
+                      <div className="flex-1 text-left">
+                        <p className="font-semibold">Episode {i + 1}</p>
+                        <p className="text-sm text-gray-400">24:00</p>
+                      </div>
+                      {i === 0 && <span className="text-sm bg-white/20 px-2 py-1 rounded">Now Playing</span>}
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-slate-800 rounded-lg p-6">
+              <h3 className="text-xl font-bold mb-4">Up Next</h3>
+              <div className="space-y-4">
+                <p className="text-gray-400 text-center py-8">Up next coming soon</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-800 rounded-lg p-6">
+              <h3 className="text-xl font-bold mb-4">Comments</h3>
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 bg-teal-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
+                    U
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm">User123</p>
+                    <p className="text-sm text-gray-400 mt-1">This episode was amazing! Can't wait for the next one.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 bg-cyan-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
+                    A
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm">AnimeFan</p>
+                    <p className="text-sm text-gray-400 mt-1">The animation quality is incredible!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
