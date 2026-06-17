@@ -3,6 +3,8 @@ import { Star, Play, Calendar, Clock, ArrowLeft, Heart, Share2, Send } from 'luc
 import { useState, useEffect } from 'react'
 import { animeAPI, favoritesAPI, authAPI } from '../services/api'
 
+const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin
+
 export default function AnimeDetail() {
   const { id } = useParams()
   const [anime, setAnime] = useState(null)
@@ -110,7 +112,7 @@ export default function AnimeDetail() {
       <div className="relative h-[400px]">
         {anime.image_url ? (
           <img
-            src={`http://localhost:5000${anime.image_url}`}
+            src={`${BACKEND_ORIGIN}${anime.image_url}`}
             alt={anime.title}
             className="w-full h-full object-cover"
           />
