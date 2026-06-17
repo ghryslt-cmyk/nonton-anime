@@ -3,7 +3,7 @@ import { Star, Play, Calendar } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { animeAPI } from '../services/api'
 
-const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin
+const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin)
 
 export default function Home() {
   const [animeList, setAnimeList] = useState([])
@@ -43,7 +43,7 @@ export default function Home() {
               Discover, review, and watch your favorite anime. Join our community of anime enthusiasts.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/watch/1" className="bg-teal-600 hover:bg-teal-700 px-6 md:px-8 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+              <Link to="/browse" className="bg-teal-600 hover:bg-teal-700 px-6 md:px-8 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
                 <Play className="w-5 h-5" />
                 Start Watching
               </Link>

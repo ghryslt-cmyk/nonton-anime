@@ -40,6 +40,17 @@ const apiCall = async (endpoint, options = {}) => {
 
   if (!response.ok) {
     const error = await response.json();
+    // If token is invalid, redirect to login
+    if (response.status === 401 || response.status === 403) {
+      console.error('Authentication error:', error.error);
+      // Clear invalid token
+      removeToken();
+      removeUser();
+      // Redirect to login page
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
     throw new Error(error.error || 'API request failed');
   }
 

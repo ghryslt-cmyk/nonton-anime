@@ -3,6 +3,8 @@ import { Feather, User, Mail, Calendar, Heart, History, Settings, LogOut, Camera
 import { useState, useEffect } from 'react'
 import { userAPI, favoritesAPI, authAPI } from '../services/api'
 
+const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin)
+
 export default function Profile() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
@@ -28,6 +30,10 @@ export default function Profile() {
     try {
       const data = await userAPI.getProfile()
       setUser(data)
+      // Load profile photo from backend if exists
+      if (data.profile_photo) {
+        setProfilePhoto(`${BACKEND_ORIGIN}${data.profile_photo}`)
+      }
     } catch (err) {
       console.error('Failed to load profile:', err)
     } finally {
@@ -63,16 +69,42 @@ export default function Profile() {
   const handleSaveProfile = async () => {
     setSaving(true)
     try {
+      const token = localStorage.getItem('token')
+      const formData = new FormData()
+      formData.append('name', editForm.name)
+      formData.append('email', editForm.email)
+
+      if (profilePhoto && profilePhoto.startsWith('data:')) {
+        // Convert base64 to blob and append as file
+        const response = await fetch(profilePhoto)
+        const blob = await response.blob()
+        formData.append('profile_photo', blob, 'profile.jpg')
+      }
+
+      const response = await fetch(`${BACKEND_ORIGIN}/api/profile`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update profile')
+      }
+
+      const data = await response.json()
+
       // Update user in localStorage
-      const currentUser = authAPI.getCurrentUser()
-      const updatedUser = { ...currentUser, name: editForm.name, email: editForm.email }
-      localStorage.setItem('user', JSON.stringify(updatedUser))
-      setUser(updatedUser)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      setUser(data.user)
       setEditing(false)
+      setProfilePhoto(null)
       alert('Profile updated successfully!')
     } catch (err) {
       console.error('Failed to update profile:', err)
-      alert('Failed to update profile')
+      alert('Failed to update profile: ' + (err.message || 'Unknown error'))
     } finally {
       setSaving(false)
     }
@@ -208,7 +240,7 @@ export default function Profile() {
                   {favorites.map((anime) => (
                     <Link key={anime.id} to={`/anime/${anime.id}`} className="flex gap-4 bg-slate-700 rounded-lg p-4 hover:bg-slate-600 transition">
                       {anime.image_url ? (
-                        <img src={`http://localhost:5000${anime.image_url}`} alt={anime.title} className="w-16 h-24 object-cover rounded" />
+                        <img src={`${BACKEND_ORIGIN}${anime.image_url}`} alt={anime.title} className="w-16 h-24 object-cover rounded" />
                       ) : (
                         <div className="w-16 h-24 bg-slate-600 rounded"></div>
                       )}

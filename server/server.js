@@ -112,6 +112,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   fs.mkdirSync(path.join(uploadsDir, 'images'), { recursive: true });
   fs.mkdirSync(path.join(uploadsDir, 'videos'), { recursive: true });
+  fs.mkdirSync(path.join(uploadsDir, 'profiles'), { recursive: true });
 }
 
 // Multer configuration
@@ -121,6 +122,8 @@ const storage = multer.diskStorage({
       cb(null, 'uploads/images/');
     } else if (file.fieldname === 'video') {
       cb(null, 'uploads/videos/');
+    } else if (file.fieldname === 'profile_photo') {
+      cb(null, 'uploads/profiles/');
     }
   },
   filename: function (req, file, cb) {
@@ -160,6 +163,7 @@ async function initializeDatabase() {
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         role TEXT DEFAULT 'user',
+        profile_photo TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -678,21 +682,21 @@ app.get('/api/users', authenticateToken, requireAdmin, async (req, res) => {
 
 app.get('/api/profile', authenticateToken, async (req, res) => {
   try {
-    const userResult = await pool.query('SELECT id, name, email, role, created_at FROM users WHERE id = $1', [req.user.id]);
+    const userResult = await pool.query('SELECT id, name, email, role, profile_photo, created_at FROM users WHERE id = $1', [req.user.id]);
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     const user = userResult.rows[0];
-    
+
     // Get favorites count
     const favResult = await pool.query('SELECT COUNT(*) as count FROM favorites WHERE user_id = $1', [req.user.id]);
     const favoritesCount = parseInt(favResult.rows[0].count);
-    
+
     // Get watch history count
     const histResult = await pool.query('SELECT COUNT(DISTINCT anime_id) as count FROM watch_history WHERE user_id = $1', [req.user.id]);
     const watchedCount = parseInt(histResult.rows[0].count);
-    
+
     res.json({
       ...user,
       favorites_count: favoritesCount,
@@ -700,6 +704,44 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
+  }
+});
+
+app.put('/api/profile', authenticateToken, upload.single('profile_photo'), async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    let profilePhotoUrl = null;
+
+    if (req.file) {
+      profilePhotoUrl = `/uploads/profiles/${req.file.filename}`;
+    }
+
+    let query = 'UPDATE users SET name = $1, email = $2';
+    let params = [name, email];
+    let paramCount = 2;
+
+    if (profilePhotoUrl) {
+      query += `, profile_photo = $${paramCount + 1}`;
+      params.push(profilePhotoUrl);
+      paramCount++;
+    }
+
+    query += ` WHERE id = $${paramCount + 1}`;
+    params.push(req.user.id);
+
+    await pool.query(query, params);
+
+    // Get updated user data
+    const userResult = await pool.query('SELECT id, name, email, role, profile_photo, created_at FROM users WHERE id = $1', [req.user.id]);
+    const user = userResult.rows[0];
+
+    res.json({
+      message: 'Profile updated successfully',
+      user
+    });
+  } catch (err) {
+    console.error('Profile update error:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
   }
 });
 
