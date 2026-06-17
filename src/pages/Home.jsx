@@ -21,10 +21,10 @@ export default function Home() {
       console.error('Failed to load anime:', err)
       // Fallback to mock data if API fails
       const { animeData } = await import('../data/animeData')
-      // Map mock data to match API structure
+      // Map mock data to match API structure - use full URL for images
       const mappedData = animeData.map(anime => ({
         ...anime,
-        image_url: anime.image, // Map 'image' to 'image_url'
+        image_url: anime.image, // Use external URLs for mock data
       }))
       setAnimeList(mappedData)
     } finally {
@@ -71,15 +71,23 @@ export default function Home() {
               <div className="relative bg-slate-800 rounded-lg overflow-hidden hover:scale-105 transition-transform duration-300">
                 {anime.image_url ? (
                   <img
-                    src={`${BACKEND_ORIGIN}${anime.image_url}`}
+                    src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                     alt={anime.title}
                     className="w-full h-48 md:h-64 object-cover"
+                    onError={(e) => {
+                      console.error('Image load error:', anime.image_url);
+                      e.target.style.display = 'none';
+                      e.target.parentElement.querySelector('.fallback-image')?.style.setProperty('display', 'flex');
+                    }}
                   />
                 ) : (
                   <div className="w-full h-48 md:h-64 bg-slate-700 flex items-center justify-center">
                     <span className="text-gray-500 text-sm">No Image</span>
                   </div>
                 )}
+                <div className="fallback-image w-full h-48 md:h-64 bg-slate-700 flex items-center justify-center hidden">
+                  <span className="text-gray-500 text-sm">Image Error</span>
+                </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                   <Play className="w-8 md:w-12 h-8 md:h-12 text-white" />
                 </div>
@@ -107,15 +115,23 @@ export default function Home() {
               <div className="relative bg-slate-800 rounded-lg overflow-hidden hover:scale-105 transition-transform duration-300">
                 {anime.image_url ? (
                   <img
-                    src={`${BACKEND_ORIGIN}${anime.image_url}`}
+                    src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                     alt={anime.title}
                     className="w-full h-48 md:h-64 object-cover"
+                    onError={(e) => {
+                      console.error('Image load error:', anime.image_url);
+                      e.target.style.display = 'none';
+                      e.target.parentElement.querySelector('.fallback-image')?.style.setProperty('display', 'flex');
+                    }}
                   />
                 ) : (
                   <div className="w-full h-48 md:h-64 bg-slate-700 flex items-center justify-center">
                     <span className="text-gray-500 text-sm">No Image</span>
                   </div>
                 )}
+                <div className="fallback-image w-full h-48 md:h-64 bg-slate-700 flex items-center justify-center hidden">
+                  <span className="text-gray-500 text-sm">Image Error</span>
+                </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                   <Play className="w-8 md:w-12 h-8 md:h-12 text-white" />
                 </div>
