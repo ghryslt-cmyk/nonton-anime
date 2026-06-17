@@ -13,7 +13,7 @@ const validator = require('validator');
 
 const app = express();
 
-// Trust proxy for Railway (behind reverse proxy)
+// Trust proxy for Railway (behind reverse proxy) - only trust specific proxies
 app.set('trust proxy', true);
 const PORT = process.env.PORT || 5000;
 
@@ -84,6 +84,7 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  trustProxy: false, // Disable trust proxy validation for Railway
 });
 
 const authLimiter = rateLimit({
@@ -91,6 +92,7 @@ const authLimiter = rateLimit({
   max: 100, // limit each IP to 100 login attempts per windowMs (increased for development)
   message: 'Too many login attempts, please try again later.',
   skipSuccessfulRequests: true,
+  trustProxy: false, // Disable trust proxy validation for Railway
 });
 
 app.use('/api/', limiter);
@@ -102,11 +104,26 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
+console.log('Uploads directory:', uploadsDir);
+console.log('RAILWAY_VOLUME_MOUNT_PATH:', process.env.RAILWAY_VOLUME_MOUNT_PATH);
+
 if (!fs.existsSync(uploadsDir)) {
+  console.log('Creating uploads directory:', uploadsDir);
   fs.mkdirSync(uploadsDir, { recursive: true });
   fs.mkdirSync(path.join(uploadsDir, 'images'), { recursive: true });
   fs.mkdirSync(path.join(uploadsDir, 'videos'), { recursive: true });
   fs.mkdirSync(path.join(uploadsDir, 'profiles'), { recursive: true });
+} else {
+  console.log('Uploads directory exists:', uploadsDir);
+  // Ensure subdirectories exist
+  const subdirs = ['images', 'videos', 'profiles'];
+  subdirs.forEach(subdir => {
+    const subdirPath = path.join(uploadsDir, subdir);
+    if (!fs.existsSync(subdirPath)) {
+      console.log('Creating subdirectory:', subdirPath);
+      fs.mkdirSync(subdirPath, { recursive: true });
+    }
+  });
 }
 
 // Serve static files with proper headers
