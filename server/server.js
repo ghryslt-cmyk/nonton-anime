@@ -168,6 +168,14 @@ async function initializeDatabase() {
       )
     `);
 
+    // Add profile_photo column if it doesn't exist (for existing databases)
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
+    } catch (err) {
+      // Column might already exist, ignore error
+      console.log('profile_photo column check:', err.message);
+    }
+
     // Anime table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS anime (
@@ -587,6 +595,15 @@ app.post('/api/anime/:id/episodes', authenticateToken, requireAdmin, async (req,
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/anime/:id/episodes/:episodeId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM episodes WHERE id = $1 AND anime_id = $2', [req.params.episodeId, req.params.id]);
+    res.json({ message: 'Episode deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete episode' });
   }
 });
 

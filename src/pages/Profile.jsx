@@ -17,7 +17,9 @@ export default function Profile() {
 
   useEffect(() => {
     const currentUser = authAPI.getCurrentUser()
+    console.log('Current user in Profile:', currentUser)
     if (!currentUser) {
+      console.log('No user found, redirecting to login')
       navigate('/login')
       return
     }

@@ -144,6 +144,23 @@ export default function Admin() {
     }
   }
 
+  const handleDeleteEpisode = async (animeId, episodeId) => {
+    if (!confirm('Are you sure you want to delete this episode?')) return
+
+    try {
+      await animeAPI.deleteEpisode(animeId, episodeId)
+      alert('Episode deleted successfully!')
+      // Reload episodes for selected anime
+      if (selectedAnime && selectedAnime.id === animeId) {
+        const episodes = await animeAPI.getEpisodes(animeId)
+        setSelectedAnime({ ...selectedAnime, episodes })
+      }
+    } catch (err) {
+      alert('Failed to delete episode: ' + (err.message || 'Unknown error'))
+      console.error('Delete episode error:', err)
+    }
+  }
+
   const handleAddEpisode = async (animeId) => {
     if (!episodeForm.episode_number || !episodeForm.video_url) {
       alert('Please fill in episode number and video URL')
@@ -525,9 +542,18 @@ export default function Admin() {
                                 <p className="font-semibold text-sm md:text-base">Episode {episode.episode_number}: {episode.title || 'Untitled'}</p>
                                 <p className="text-xs md:text-sm text-gray-400 break-all">{episode.video_platform} • {episode.video_url}</p>
                               </div>
-                              <span className="px-3 py-1 bg-teal-600 rounded-full text-xs whitespace-nowrap">
-                                {episode.video_platform}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="px-3 py-1 bg-teal-600 rounded-full text-xs whitespace-nowrap">
+                                  {episode.video_platform}
+                                </span>
+                                <button
+                                  onClick={() => handleDeleteEpisode(selectedAnime.id, episode.id)}
+                                  className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition"
+                                  title="Delete Episode"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>

@@ -149,6 +149,10 @@ export const animeAPI = {
     });
   },
 
+  deleteEpisode: async (animeId, episodeId) => {
+    return apiCall(`/anime/${animeId}/episodes/${episodeId}`, { method: 'DELETE' });
+  },
+
   getReviews: async (animeId) => {
     return apiCall(`/anime/${animeId}/reviews`);
   },
