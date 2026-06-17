@@ -12,9 +12,6 @@ const Joi = require('joi');
 const validator = require('validator');
 
 const app = express();
-
-// Trust proxy for Railway (behind reverse proxy) - only trust specific proxies
-app.set('trust proxy', true);
 const PORT = process.env.PORT || 5000;
 
 // Environment variable validation
@@ -84,7 +81,6 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  trustProxy: false, // Disable trust proxy validation for Railway
 });
 
 const authLimiter = rateLimit({
@@ -92,7 +88,6 @@ const authLimiter = rateLimit({
   max: 100, // limit each IP to 100 login attempts per windowMs (increased for development)
   message: 'Too many login attempts, please try again later.',
   skipSuccessfulRequests: true,
-  trustProxy: false, // Disable trust proxy validation for Railway
 });
 
 app.use('/api/', limiter);
