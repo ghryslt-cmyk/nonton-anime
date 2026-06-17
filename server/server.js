@@ -124,9 +124,11 @@ if (!fs.existsSync(uploadsDir)) {
 // Serve static files with proper headers
 app.use('/uploads', (req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Access-Control-Allow-Credentials', 'true');
   res.set('Cache-Control', 'public, max-age=3600');
+  res.set('Cross-Origin-Resource-Policy', 'cross-origin');
   next();
 }, express.static(uploadsDir));
 
