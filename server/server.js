@@ -101,13 +101,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', (req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.set('Cache-Control', 'public, max-age=3600');
   next();
 }, express.static(path.join(__dirname, 'uploads')));
 
 // Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   fs.mkdirSync(path.join(uploadsDir, 'images'), { recursive: true });
@@ -118,12 +118,13 @@ if (!fs.existsSync(uploadsDir)) {
 // Multer configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
     if (file.fieldname === 'image') {
-      cb(null, 'uploads/images/');
+      cb(null, path.join(uploadsDir, 'images'));
     } else if (file.fieldname === 'video') {
-      cb(null, 'uploads/videos/');
+      cb(null, path.join(uploadsDir, 'videos'));
     } else if (file.fieldname === 'profile_photo') {
-      cb(null, 'uploads/profiles/');
+      cb(null, path.join(uploadsDir, 'profiles'));
     }
   },
   filename: function (req, file, cb) {
