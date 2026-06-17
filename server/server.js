@@ -12,6 +12,9 @@ const Joi = require('joi');
 const validator = require('validator');
 
 const app = express();
+
+// Trust proxy for Railway (behind reverse proxy)
+app.set('trust proxy', true);
 const PORT = process.env.PORT || 5000;
 
 // Environment variable validation
@@ -97,15 +100,6 @@ app.use('/api/register', authLimiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static files with proper headers
-app.use('/uploads', (req, res, next) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.set('Cache-Control', 'public, max-age=3600');
-  next();
-}, express.static(path.join(__dirname, 'uploads')));
-
 // Create uploads directory if it doesn't exist
 const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -114,6 +108,15 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(path.join(uploadsDir, 'videos'), { recursive: true });
   fs.mkdirSync(path.join(uploadsDir, 'profiles'), { recursive: true });
 }
+
+// Serve static files with proper headers
+app.use('/uploads', (req, res, next) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Cache-Control', 'public, max-age=3600');
+  next();
+}, express.static(uploadsDir));
 
 // Multer configuration
 const storage = multer.diskStorage({
