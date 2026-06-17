@@ -3,7 +3,7 @@ import { Feather, User, Mail, Calendar, Heart, History, Settings, LogOut, Camera
 import { useState, useEffect } from 'react'
 import { userAPI, favoritesAPI, authAPI } from '../services/api'
 
-const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin)
+const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin
 
 export default function Profile() {
   const navigate = useNavigate()

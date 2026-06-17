@@ -3,7 +3,7 @@ import { Star, Play, Calendar, Clock, ArrowLeft, Heart, Share2, Send } from 'luc
 import { useState, useEffect } from 'react'
 import { animeAPI, favoritesAPI, authAPI } from '../services/api'
 
-const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin)
+const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin
 
 export default function AnimeDetail() {
   const { id } = useParams()
