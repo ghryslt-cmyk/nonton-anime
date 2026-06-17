@@ -3,6 +3,8 @@ import { Star, Play, Calendar } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { animeAPI } from '../services/api'
 
+const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin
+
 export default function Home() {
   const [animeList, setAnimeList] = useState([])
   const [loading, setLoading] = useState(true)
@@ -32,54 +34,54 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="relative h-[500px] bg-gradient-to-r from-teal-900 to-cyan-900">
+      <div className="relative h-[400px] md:h-[500px] bg-gradient-to-r from-teal-900 to-cyan-900">
         <div className="absolute inset-0 bg-black/50" />
-        <div className="relative max-w-7xl mx-auto px-6 h-full flex items-center">
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center">
           <div className="max-w-2xl">
-            <h1 className="text-5xl font-bold mb-4">Welcome to WorldEnd Stream</h1>
-            <p className="text-xl text-gray-200 mb-8">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4">Welcome to WorldEnd Stream</h1>
+            <p className="text-lg md:text-xl text-gray-200 mb-8">
               Discover, review, and watch your favorite anime. Join our community of anime enthusiasts.
             </p>
-            <div className="flex gap-4">
-              <button className="bg-teal-600 hover:bg-teal-700 px-8 py-3 rounded-lg font-semibold transition flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link to="/watch/1" className="bg-teal-600 hover:bg-teal-700 px-6 md:px-8 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
                 <Play className="w-5 h-5" />
                 Start Watching
-              </button>
-              <button className="bg-slate-700 hover:bg-slate-600 px-8 py-3 rounded-lg font-semibold transition">
+              </Link>
+              <Link to="/browse" className="bg-slate-700 hover:bg-slate-600 px-6 md:px-8 py-3 rounded-lg font-semibold transition text-center">
                 Browse All
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
       {/* Trending Section */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
+        <h2 className="text-2xl md:text-3xl font-bold mb-8 flex items-center gap-2">
           <span className="text-teal-500">🔥</span> Trending Now
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
           {animeList.slice(0, 5).map((anime) => (
             <Link key={anime.id} to={`/anime/${anime.id}`} className="group">
               <div className="relative bg-slate-800 rounded-lg overflow-hidden hover:scale-105 transition-transform duration-300">
                 {anime.image_url ? (
                   <img
-                    src={`http://localhost:5000${anime.image_url}`}
+                    src={`${BACKEND_ORIGIN}${anime.image_url}`}
                     alt={anime.title}
-                    className="w-full h-64 object-cover"
+                    className="w-full h-48 md:h-64 object-cover"
                   />
                 ) : (
-                  <div className="w-full h-64 bg-slate-700 flex items-center justify-center">
-                    <span className="text-gray-500">No Image</span>
+                  <div className="w-full h-48 md:h-64 bg-slate-700 flex items-center justify-center">
+                    <span className="text-gray-500 text-sm">No Image</span>
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                  <Play className="w-12 h-12 text-white" />
+                  <Play className="w-8 md:w-12 h-8 md:h-12 text-white" />
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-sm mb-2 line-clamp-2">{anime.title}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                <div className="p-3 md:p-4">
+                  <h3 className="font-semibold text-xs md:text-sm mb-2 line-clamp-2">{anime.title}</h3>
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400">
+                    <Star className="w-3 h-3 md:w-4 h-4 text-yellow-500 fill-yellow-500" />
                     <span>{anime.rating || 0}</span>
                   </div>
                 </div>
@@ -90,32 +92,32 @@ export default function Home() {
       </div>
 
       {/* Popular Section */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
+        <h2 className="text-2xl md:text-3xl font-bold mb-8 flex items-center gap-2">
           <span className="text-cyan-500">⭐</span> Popular Anime
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
           {animeList.slice(3, 8).map((anime) => (
             <Link key={anime.id} to={`/anime/${anime.id}`} className="group">
               <div className="relative bg-slate-800 rounded-lg overflow-hidden hover:scale-105 transition-transform duration-300">
                 {anime.image_url ? (
                   <img
-                    src={`http://localhost:5000${anime.image_url}`}
+                    src={`${BACKEND_ORIGIN}${anime.image_url}`}
                     alt={anime.title}
-                    className="w-full h-64 object-cover"
+                    className="w-full h-48 md:h-64 object-cover"
                   />
                 ) : (
-                  <div className="w-full h-64 bg-slate-700 flex items-center justify-center">
-                    <span className="text-gray-500">No Image</span>
+                  <div className="w-full h-48 md:h-64 bg-slate-700 flex items-center justify-center">
+                    <span className="text-gray-500 text-sm">No Image</span>
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                  <Play className="w-12 h-12 text-white" />
+                  <Play className="w-8 md:w-12 h-8 md:h-12 text-white" />
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-sm mb-2 line-clamp-2">{anime.title}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                <div className="p-3 md:p-4">
+                  <h3 className="font-semibold text-xs md:text-sm mb-2 line-clamp-2">{anime.title}</h3>
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400">
+                    <Star className="w-3 h-3 md:w-4 h-4 text-yellow-500 fill-yellow-500" />
                     <span>{anime.rating || 0}</span>
                   </div>
                 </div>
@@ -126,32 +128,32 @@ export default function Home() {
       </div>
 
       {/* Latest Updates */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
+        <h2 className="text-2xl md:text-3xl font-bold mb-8 flex items-center gap-2">
           <span className="text-teal-500">📺</span> Latest Updates
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {animeList.slice(0, 3).map((anime) => (
             <Link key={anime.id} to={`/anime/${anime.id}`} className="flex gap-4 bg-slate-800 rounded-lg overflow-hidden hover:bg-slate-700 transition">
               {anime.image_url ? (
                 <img
-                  src={`http://localhost:5000${anime.image_url}`}
+                  src={`${BACKEND_ORIGIN}${anime.image_url}`}
                   alt={anime.title}
-                  className="w-32 h-24 object-cover"
+                  className="w-24 md:w-32 h-20 md:h-24 object-cover"
                 />
               ) : (
-                <div className="w-32 h-24 bg-slate-700 flex items-center justify-center">
+                <div className="w-24 md:w-32 h-20 md:h-24 bg-slate-700 flex items-center justify-center">
                   <span className="text-gray-500 text-xs">No Image</span>
                 </div>
               )}
-              <div className="p-4 flex-1">
-                <h3 className="font-semibold mb-1">{anime.title}</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <Calendar className="w-4 h-4" />
+              <div className="p-3 md:p-4 flex-1">
+                <h3 className="font-semibold text-sm md:text-base mb-1">{anime.title}</h3>
+                <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400">
+                  <Calendar className="w-3 h-3 md:w-4 h-4" />
                   <span>Episode {anime.episodes}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 mt-1">
+                  <Star className="w-3 h-3 md:w-4 h-4 text-yellow-500 fill-yellow-500" />
                   <span>{anime.rating || 0}</span>
                 </div>
               </div>
