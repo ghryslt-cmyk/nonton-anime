@@ -21,7 +21,12 @@ export default function Home() {
       console.error('Failed to load anime:', err)
       // Fallback to mock data if API fails
       const { animeData } = await import('../data/animeData')
-      setAnimeList(animeData)
+      // Map mock data to match API structure
+      const mappedData = animeData.map(anime => ({
+        ...anime,
+        image_url: anime.image, // Map 'image' to 'image_url'
+      }))
+      setAnimeList(mappedData)
     } finally {
       setLoading(false)
     }

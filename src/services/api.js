@@ -1,10 +1,23 @@
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
 
-// Get token from localStorage
-const getToken = () => localStorage.getItem('token');
+// Get token from localStorage (obfuscated for security)
+const getToken = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    // Simple obfuscation: base64 decode
+    return atob(token);
+  } catch {
+    return token;
+  }
+};
 
-// Set token in localStorage
-const setToken = (token) => localStorage.setItem('token', token);
+// Set token in localStorage (obfuscated for security)
+const setToken = (token) => {
+  // Simple obfuscation: base64 encode
+  const obfuscated = btoa(token);
+  localStorage.setItem('token', obfuscated);
+};
 
 // Remove token from localStorage
 const removeToken = () => localStorage.removeItem('token');

@@ -108,22 +108,13 @@ export default function Login() {
 
           <div className="mt-6 pt-6 border-t border-slate-700">
             <p className="text-center text-sm text-gray-400 mb-4">Or continue with</p>
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                onClick={() => alert('Google login coming soon!')}
-                className="bg-slate-700 hover:bg-slate-600 py-3 rounded-lg transition flex items-center justify-center gap-2"
-              >
-                <span>G</span>
-                <span>Google</span>
-              </button>
-              <button 
-                onClick={() => alert('Twitter login coming soon!')}
-                className="bg-slate-700 hover:bg-slate-600 py-3 rounded-lg transition flex items-center justify-center gap-2"
-              >
-                <span>X</span>
-                <span>Twitter</span>
-              </button>
-            </div>
+            <button
+              onClick={() => alert('Google login coming soon!')}
+              className="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg transition flex items-center justify-center gap-2"
+            >
+              <span>G</span>
+              <span>Google</span>
+            </button>
           </div>
         </div>
       </div>
