@@ -42,7 +42,7 @@ export default function BrowseAll() {
   return (
     <div className="min-h-screen bg-slate-900">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-teal-900 to-cyan-900 py-12 md:py-16">
+      <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">Browse All Anime</h1>
           <p className="text-lg md:text-xl text-gray-300">Explore our complete collection of anime</p>
@@ -57,12 +57,12 @@ export default function BrowseAll() {
             placeholder="Search anime..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-slate-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base"
+            className="flex-1 bg-slate-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm md:text-base"
           />
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="bg-slate-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base md:w-auto"
+            className="bg-slate-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm md:text-base md:w-auto"
           >
             <option value="all">All Status</option>
             <option value="Ongoing">Ongoing</option>
@@ -76,11 +76,11 @@ export default function BrowseAll() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {filteredAnime.map((anime) => (
               <Link key={anime.id} to={`/anime/${anime.id}`} className="group">
-                <div className="bg-slate-800 rounded-lg overflow-hidden hover:shadow-xl hover:shadow-teal-500/20 transition-all duration-300">
+                <div className="bg-slate-800 rounded-lg overflow-hidden hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
                   <div className="relative aspect-[3/4] overflow-hidden">
                     {anime.image_url ? (
                       <img
-                        src={`${BACKEND_ORIGIN}${anime.image_url}`}
+                        src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                         alt={anime.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
@@ -91,7 +91,7 @@ export default function BrowseAll() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="absolute bottom-4 left-4 right-4">
-                        <div className="flex items-center justify-center gap-2 bg-teal-600 px-3 py-2 rounded-full text-xs md:text-sm font-semibold">
+                        <div className="flex items-center justify-center gap-2 bg-purple-600 px-3 py-2 rounded-full text-xs md:text-sm font-semibold">
                           <Play className="w-3 h-3 md:w-4 h-4" />
                           Watch Now
                         </div>
@@ -99,7 +99,7 @@ export default function BrowseAll() {
                     </div>
                   </div>
                   <div className="p-3 md:p-4">
-                    <h3 className="font-semibold text-xs md:text-lg mb-2 line-clamp-2 group-hover:text-teal-400 transition">
+                    <h3 className="font-semibold text-xs md:text-lg mb-2 line-clamp-2 group-hover:text-purple-400 transition">
                       {anime.title}
                     </h3>
                     <div className="flex items-center justify-between text-xs md:text-sm text-gray-400">
