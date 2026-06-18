@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Mask } from 'lucide-react'
+import { LayoutGrid } from 'lucide-react'
 
 export default function Genre() {
   const genres = [
@@ -28,7 +28,7 @@ export default function Genre() {
       <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center gap-3 mb-4">
-            <Mask className="w-8 h-8 text-purple-400" />
+            <LayoutGrid className="w-8 h-8 text-purple-400" />
             <h1 className="text-5xl font-bold">Browse by Genre</h1>
           </div>
           <p className="text-xl text-gray-300">Find anime by your favorite genre</p>
