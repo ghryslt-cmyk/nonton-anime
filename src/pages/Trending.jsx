@@ -42,8 +42,8 @@ export default function Trending() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-16">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-3 mb-4">
-            <TrendingUp className="w-8 h-8 text-pink-400" />
+          <div className="flex items-center gap-4 mb-4">
+            <img src="/logo.png" alt="WorldEnd Stream" className="w-12 h-12 object-contain" />
             <h1 className="text-5xl font-bold">Trending Now</h1>
           </div>
           <p className="text-xl text-gray-300">Most popular anime this week</p>

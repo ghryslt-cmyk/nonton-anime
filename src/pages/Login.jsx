@@ -30,8 +30,8 @@ export default function Login() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <Feather className="w-12 h-12 text-teal-400" />
-            <span className="text-3xl font-bold bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
+            <img src="/logo.png" alt="WorldEnd Stream" className="w-12 h-12 object-contain" />
+            <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
               WorldEnd Stream
             </span>
           </Link>
@@ -50,7 +50,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full bg-slate-700 text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full bg-slate-700 text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 />
               </div>
@@ -65,7 +65,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full bg-slate-700 text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full bg-slate-700 text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 />
               </div>
@@ -73,10 +73,10 @@ export default function Login() {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2">
-                <input type="checkbox" className="rounded bg-slate-700 border-slate-600 text-teal-500 focus:ring-teal-500" />
+                <input type="checkbox" className="rounded bg-slate-700 border-slate-600 text-purple-500 focus:ring-purple-500" />
                 <span className="text-sm text-gray-400">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-teal-400 hover:text-teal-300">
+              <Link to="/forgot-password" className="text-sm text-purple-400 hover:text-purple-300">
                 Forgot password?
               </Link>
             </div>
@@ -90,7 +90,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-teal-600 hover:bg-teal-700 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
               {!loading && <ArrowRight className="w-5 h-5" />}
@@ -100,7 +100,7 @@ export default function Login() {
           <div className="mt-6 text-center">
             <p className="text-gray-400">
               Don't have an account?{' '}
-              <Link to="/register" className="text-teal-400 hover:text-teal-300 font-semibold">
+              <Link to="/register" className="text-purple-400 hover:text-purple-300 font-semibold">
                 Sign up
               </Link>
             </p>

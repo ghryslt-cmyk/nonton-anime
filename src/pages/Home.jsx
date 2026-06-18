@@ -39,16 +39,19 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="relative h-[400px] md:h-[500px] bg-gradient-to-r from-teal-900 to-cyan-900">
+      <div className="relative h-[400px] md:h-[500px] bg-gradient-to-r from-purple-900 to-pink-900">
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center">
           <div className="max-w-2xl">
+            <div className="flex items-center gap-4 mb-6">
+              <img src="/logo.png" alt="WorldEnd Stream" className="w-16 h-16 md:w-20 md:h-20 object-contain" />
+            </div>
             <h1 className="text-3xl md:text-5xl font-bold mb-4">Welcome to WorldEnd Stream</h1>
             <p className="text-lg md:text-xl text-gray-200 mb-8">
               Discover, review, and watch your favorite anime. Join our community of anime enthusiasts.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/browse" className="bg-teal-600 hover:bg-teal-700 px-6 md:px-8 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+              <Link to="/browse" className="bg-purple-600 hover:bg-purple-700 px-6 md:px-8 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
                 <Play className="w-5 h-5" />
                 Start Watching
               </Link>
