@@ -65,7 +65,7 @@ export default function Navbar() {
             Trending
           </Link>
           <Link to="/popular" className="text-gray-300 hover:text-teal-400 transition">
-            Popular
+            Genre
           </Link>
           {user && user.role === 'admin' && (
             <Link to="/admin" className="text-gray-300 hover:text-teal-400 transition">
@@ -133,7 +133,7 @@ export default function Navbar() {
               Trending
             </Link>
             <Link to="/popular" className="text-gray-300 hover:text-teal-400 transition py-2" onClick={() => setMobileMenuOpen(false)}>
-              Popular
+              Genre
             </Link>
             {user && user.role === 'admin' && (
               <Link to="/admin" className="text-gray-300 hover:text-teal-400 transition py-2" onClick={() => setMobileMenuOpen(false)}>

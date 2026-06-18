@@ -3,6 +3,8 @@ import { Star, Play, TrendingUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { animeAPI } from '../services/api'
 
+const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin
+
 export default function Trending() {
   const [anime, setAnime] = useState([])
   const [loading, setLoading] = useState(true)
@@ -20,7 +22,12 @@ export default function Trending() {
     } catch (err) {
       console.error('Failed to load anime:', err)
       const { animeData: mockData } = await import('../data/animeData')
-      setAnime(mockData.sort((a, b) => b.rating - a.rating))
+      // Map mock data to match API structure
+      const mappedData = mockData.map(anime => ({
+        ...anime,
+        image_url: anime.image, // Use external URLs for mock data
+      }))
+      setAnime(mappedData.sort((a, b) => b.rating - a.rating))
     } finally {
       setLoading(false)
     }
@@ -55,15 +62,23 @@ export default function Trending() {
                   <div className="relative aspect-[3/4] overflow-hidden">
                     {anime.image_url ? (
                       <img
-                        src={`http://localhost:5000${anime.image_url}`}
+                        src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                         alt={anime.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          console.error('Image load error:', anime.image_url);
+                          e.target.style.display = 'none';
+                          e.target.parentElement.querySelector('.fallback-image')?.style.setProperty('display', 'flex');
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full bg-slate-700 flex items-center justify-center">
                         <span className="text-gray-500">No Image</span>
                       </div>
                     )}
+                    <div className="fallback-image w-full h-full bg-slate-700 flex items-center justify-center hidden">
+                      <span className="text-gray-500">Image Error</span>
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="absolute bottom-4 left-4 right-4">
                         <div className="flex items-center gap-2 bg-pink-600 px-3 py-1 rounded-full text-sm font-semibold">
