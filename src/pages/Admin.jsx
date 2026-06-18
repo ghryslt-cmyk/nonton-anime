@@ -224,7 +224,7 @@ export default function Admin() {
               <button
                 onClick={() => setActiveTab('upload')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm md:text-base ${
-                  activeTab === 'upload' ? 'bg-teal-600' : 'hover:bg-slate-700'
+                  activeTab === 'upload' ? 'bg-purple-600' : 'hover:bg-slate-700'
                 }`}
               >
                 <Upload className="w-4 h-4 md:w-5 h-5" />
@@ -233,7 +233,7 @@ export default function Admin() {
               <button
                 onClick={() => setActiveTab('manage')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm md:text-base ${
-                  activeTab === 'manage' ? 'bg-teal-600' : 'hover:bg-slate-700'
+                  activeTab === 'manage' ? 'bg-purple-600' : 'hover:bg-slate-700'
                 }`}
               >
                 <Film className="w-4 h-4 md:w-5 h-5" />
@@ -242,7 +242,7 @@ export default function Admin() {
               <button
                 onClick={() => setActiveTab('episodes')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm md:text-base ${
-                  activeTab === 'episodes' ? 'bg-teal-600' : 'hover:bg-slate-700'
+                  activeTab === 'episodes' ? 'bg-purple-600' : 'hover:bg-slate-700'
                 }`}
               >
                 <Plus className="w-4 h-4 md:w-5 h-5" />
@@ -251,7 +251,7 @@ export default function Admin() {
               <button
                 onClick={() => setActiveTab('users')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm md:text-base ${
-                  activeTab === 'users' ? 'bg-teal-600' : 'hover:bg-slate-700'
+                  activeTab === 'users' ? 'bg-purple-600' : 'hover:bg-slate-700'
                 }`}
               >
                 <Users className="w-4 h-4 md:w-5 h-5" />
@@ -260,7 +260,7 @@ export default function Admin() {
               <button
                 onClick={() => setActiveTab('settings')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm md:text-base ${
-                  activeTab === 'settings' ? 'bg-teal-600' : 'hover:bg-slate-700'
+                  activeTab === 'settings' ? 'bg-purple-600' : 'hover:bg-slate-700'
                 }`}
               >
                 <Settings className="w-4 h-4 md:w-5 h-5" />
@@ -287,7 +287,7 @@ export default function Admin() {
                         value={animeData.title}
                         onChange={handleInputChange}
                         placeholder="Enter anime title"
-                        className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                        className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                         required
                       />
                     </div>
@@ -299,7 +299,7 @@ export default function Admin() {
                         value={animeData.year}
                         onChange={handleInputChange}
                         placeholder="Release year"
-                        className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                        className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                         required
                       />
                     </div>
@@ -313,7 +313,7 @@ export default function Admin() {
                       onChange={handleInputChange}
                       placeholder="Enter anime description"
                       rows="4"
-                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                       required
                     />
                   </div>
@@ -327,7 +327,7 @@ export default function Admin() {
                         value={animeData.genres}
                         onChange={handleInputChange}
                         placeholder="Action, Fantasy, Romance"
-                        className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                        className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                         required
                       />
                     </div>
@@ -339,7 +339,7 @@ export default function Admin() {
                         value={animeData.episodes}
                         onChange={handleInputChange}
                         placeholder="Total episodes"
-                        className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                        className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                         required
                       />
                     </div>
@@ -351,7 +351,7 @@ export default function Admin() {
                       name="status"
                       value={animeData.status}
                       onChange={handleInputChange}
-                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                     >
                       <option value="Ongoing">Ongoing</option>
                       <option value="Completed">Completed</option>
@@ -360,7 +360,7 @@ export default function Admin() {
 
                   <div>
                     <label className="block text-xs md:text-sm font-medium mb-2">Cover Image</label>
-                    <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center hover:border-teal-500 transition">
+                    <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center hover:border-purple-500 transition">
                       <input
                         type="file"
                         accept="image/*"
@@ -383,7 +383,7 @@ export default function Admin() {
                     <select
                       value={animeData.video_platform}
                       onChange={(e) => setAnimeData({ ...animeData, video_platform: e.target.value })}
-                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                     >
                       <option value="youtube">YouTube</option>
                       <option value="vimeo">Vimeo</option>
@@ -398,7 +398,7 @@ export default function Admin() {
                       placeholder="https://youtube.com/watch?v=..."
                       value={animeData.video_url}
                       onChange={handleVideoUpload}
-                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                     <p className="text-xs md:text-sm text-gray-500 mt-2">
                       {animeData.video_platform === 'youtube' ? 'Paste YouTube video URL' : 
@@ -416,7 +416,7 @@ export default function Admin() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-teal-600 hover:bg-teal-700 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                    className="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
                   >
                     <Upload className="w-4 h-4 md:w-5 h-5" />
                     {loading ? 'Uploading...' : 'Upload Anime'}
@@ -446,7 +446,7 @@ export default function Admin() {
                         </div>
                       </div>
                       <div className="flex gap-2 w-full md:w-auto">
-                        <button onClick={() => handleSelectAnimeForEpisodes(anime)} className="flex-1 md:flex-none p-2 bg-teal-600 hover:bg-teal-700 rounded-lg transition">
+                        <button onClick={() => handleSelectAnimeForEpisodes(anime)} className="flex-1 md:flex-none p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
                           <Plus className="w-4 h-4 md:w-5 h-5" />
                         </button>
                         <button onClick={() => handleDeleteAnime(anime.id)} className="flex-1 md:flex-none p-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
@@ -487,7 +487,7 @@ export default function Admin() {
                             value={episodeForm.episode_number}
                             onChange={(e) => setEpisodeForm({ ...episodeForm, episode_number: e.target.value })}
                             placeholder="1"
-                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                           />
                         </div>
                         <div>
@@ -497,7 +497,7 @@ export default function Admin() {
                             value={episodeForm.title}
                             onChange={(e) => setEpisodeForm({ ...episodeForm, title: e.target.value })}
                             placeholder="Episode 1"
-                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                           />
                         </div>
                         <div>
@@ -505,7 +505,7 @@ export default function Admin() {
                           <select
                             value={episodeForm.video_platform}
                             onChange={(e) => setEpisodeForm({ ...episodeForm, video_platform: e.target.value })}
-                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                           >
                             <option value="youtube">YouTube</option>
                             <option value="vimeo">Vimeo</option>
@@ -519,13 +519,13 @@ export default function Admin() {
                             value={episodeForm.video_url}
                             onChange={(e) => setEpisodeForm({ ...episodeForm, video_url: e.target.value })}
                             placeholder="https://youtube.com/watch?v=..."
-                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                           />
                         </div>
                       </div>
                       <button
                         onClick={() => handleAddEpisode(selectedAnime.id)}
-                        className="mt-4 bg-teal-600 hover:bg-teal-700 px-6 py-2 rounded-lg transition text-sm"
+                        className="mt-4 bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg transition text-sm"
                       >
                         Add Episode
                       </button>
@@ -619,7 +619,7 @@ export default function Admin() {
                       type="text"
                       value={settings.admin_email_domain}
                       onChange={(e) => setSettings({ ...settings, admin_email_domain: e.target.value })}
-                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                     <p className="text-xs md:text-sm text-gray-400 mt-2">Users with this email domain will be registered as admins</p>
                   </div>
@@ -629,10 +629,10 @@ export default function Admin() {
                       type="number"
                       value={settings.max_video_size_mb}
                       onChange={(e) => setSettings({ ...settings, max_video_size_mb: e.target.value })}
-                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                   </div>
-                  <button onClick={handleSettingsUpdate} className="bg-teal-600 hover:bg-teal-700 px-6 py-3 rounded-lg font-semibold transition text-sm">
+                  <button onClick={handleSettingsUpdate} className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition text-sm">
                     Save Settings
                   </button>
                 </div>
