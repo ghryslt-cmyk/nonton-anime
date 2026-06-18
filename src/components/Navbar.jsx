@@ -28,7 +28,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-slate-900 border-b border-purple-700/50 px-4 md:px-6 py-4">
+    <nav className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-purple-700/50 px-4 md:px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="WorldEnd Stream" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
