@@ -86,39 +86,44 @@ export default function Home() {
 
       {/* Watch History Section */}
       {watchHistory.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-          <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-purple-500" />
-            Continue Watching
-          </h2>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            {watchHistory.slice(0, 10).map((item) => (
-              <Link key={item.id} to={`/watch/${item.animeId}?episode=${item.episodeId}`} className="flex-shrink-0 w-48 group">
-                <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
-                  {item.image ? (
-                    <img
-                      src={item.image.startsWith('http') ? item.image : `${BACKEND_ORIGIN}${item.image}`}
-                      alt={item.title}
-                      className="w-full h-28 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-28 bg-slate-700 flex items-center justify-center">
-                      <span className="text-gray-500 text-xs">No Image</span>
+        <>
+          <div className="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent my-6"></div>
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+            <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-purple-500" />
+              Continue Watching
+            </h2>
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+              {watchHistory.slice(0, 10).map((item) => (
+                <Link key={item.id} to={`/watch/${item.animeId}?episode=${item.episodeId}`} className="flex-shrink-0 w-48 group">
+                  <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+                    {item.image ? (
+                      <img
+                        src={item.image.startsWith('http') ? item.image : `${BACKEND_ORIGIN}${item.image}`}
+                        alt={item.title}
+                        className="w-full h-28 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-28 bg-slate-700 flex items-center justify-center">
+                        <span className="text-gray-500 text-xs">No Image</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                      <Play className="w-6 h-6 text-white" />
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                    <Play className="w-6 h-6 text-white" />
+                    <div className="p-3">
+                      <h3 className="font-medium text-xs line-clamp-2">{item.title}</h3>
+                      <p className="text-xs text-gray-400 mt-1">Episode {item.episode}</p>
+                    </div>
                   </div>
-                  <div className="p-3">
-                    <h3 className="font-medium text-xs line-clamp-2">{item.title}</h3>
-                    <p className="text-xs text-gray-400 mt-1">Episode {item.episode}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
+
+      <div className="h-px bg-gradient-to-r from-transparent via-pink-500/50 to-transparent my-6"></div>
 
       {/* Trending Section */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
@@ -164,6 +169,8 @@ export default function Home() {
         </div>
       </div>
 
+      <div className="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent my-6"></div>
+
       {/* Latest Updates Section */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
@@ -208,6 +215,8 @@ export default function Home() {
         </div>
       </div>
 
+      <div className="h-px bg-gradient-to-r from-transparent via-pink-500/50 to-transparent my-6"></div>
+
       {/* Genre Section */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
@@ -225,6 +234,8 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent my-6"></div>
 
       {/* Movies Section */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
