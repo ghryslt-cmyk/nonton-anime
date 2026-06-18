@@ -61,6 +61,9 @@ export default function Navbar() {
           <Link to="/browse" className="text-gray-300 hover:text-purple-400 transition">
             Browse
           </Link>
+          <Link to="/anime-list" className="text-gray-300 hover:text-purple-400 transition">
+            Anime List
+          </Link>
           <Link to="/trending" className="text-gray-300 hover:text-purple-400 transition">
             Trending
           </Link>
@@ -131,6 +134,9 @@ export default function Navbar() {
             </Link>
             <Link to="/browse" className="text-gray-300 hover:text-purple-400 transition py-2" onClick={() => setMobileMenuOpen(false)}>
               Browse
+            </Link>
+            <Link to="/anime-list" className="text-gray-300 hover:text-purple-400 transition py-2" onClick={() => setMobileMenuOpen(false)}>
+              Anime List
             </Link>
             <Link to="/trending" className="text-gray-300 hover:text-purple-400 transition py-2" onClick={() => setMobileMenuOpen(false)}>
               Trending

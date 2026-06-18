@@ -11,6 +11,7 @@ import BrowseAll from './pages/BrowseAll'
 import Trending from './pages/Trending'
 import Popular from './pages/Popular'
 import JadwalRilis from './pages/JadwalRilis'
+import AnimeList from './pages/AnimeList'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<BrowseAll />} />
+          <Route path="/anime-list" element={<AnimeList />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/popular" element={<Popular />} />
           <Route path="/jadwal-rilis" element={<JadwalRilis />} />
