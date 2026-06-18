@@ -1,16 +1,20 @@
 import { Link } from 'react-router-dom'
-import { Star, Play, Calendar } from 'lucide-react'
+import { Star, Play, Calendar, User, Clock, Film } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { animeAPI } from '../services/api'
+import { animeAPI, authAPI } from '../services/api'
 
 const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin
 
 export default function Home() {
   const [animeList, setAnimeList] = useState([])
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null)
+  const [watchHistory, setWatchHistory] = useState([])
 
   useEffect(() => {
     loadAnime()
+    loadUserInfo()
+    loadWatchHistory()
   }, [])
 
   const loadAnime = async () => {
@@ -19,16 +23,26 @@ export default function Home() {
       setAnimeList(data)
     } catch (err) {
       console.error('Failed to load anime:', err)
-      // Fallback to mock data if API fails
       const { animeData } = await import('../data/animeData')
-      // Map mock data to match API structure - use full URL for images
       const mappedData = animeData.map(anime => ({
         ...anime,
-        image_url: anime.image, // Use external URLs for mock data
+        image_url: anime.image,
       }))
       setAnimeList(mappedData)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadUserInfo = () => {
+    const currentUser = authAPI.getCurrentUser()
+    setUser(currentUser)
+  }
+
+  const loadWatchHistory = () => {
+    const history = localStorage.getItem('watchHistory')
+    if (history) {
+      setWatchHistory(JSON.parse(history))
     }
   }
 
@@ -37,46 +51,89 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <div className="relative h-[300px] md:h-[400px] bg-gradient-to-r from-purple-900 to-pink-900">
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <img src="/logo.png" alt="WorldEnd Stream" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
-              <h1 className="text-2xl md:text-4xl font-bold">WorldEnd Stream</h1>
+    <div className="min-h-screen bg-slate-900">
+      {/* Profile Section */}
+      <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur border-b border-purple-500/20">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-2xl font-bold overflow-hidden">
+              {user ? (
+                user.profile_photo ? (
+                  <img src={user.profile_photo.startsWith('http') ? user.profile_photo : `${BACKEND_ORIGIN}${user.profile_photo}`} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  user.name.charAt(0).toUpperCase()
+                )
+              ) : (
+                <User className="w-8 h-8 text-white" />
+              )}
             </div>
-            <p className="text-base md:text-lg text-gray-200 mb-6">
-              Discover, review, and watch your favorite anime
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link to="/browse" className="bg-purple-600 hover:bg-purple-700 px-5 md:px-6 py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2 text-sm md:text-base">
-                <Play className="w-4 h-4" />
-                Start Watching
-              </Link>
-              <Link to="/browse" className="bg-white/10 hover:bg-white/20 backdrop-blur px-5 md:px-6 py-2.5 rounded-lg font-medium transition text-center text-sm md:text-base">
-                Browse All
-              </Link>
+            <div className="flex-1">
+              <h1 className="text-xl md:text-2xl font-bold">
+                {user ? `Welcome back, ${user.name}!` : 'Welcome to WorldEnd Stream'}
+              </h1>
+              <p className="text-sm text-gray-400 mt-1">
+                {user ? 'Continue watching your favorite anime' : 'Sign in to track your progress'}
+              </p>
             </div>
+            {user && (
+              <Link to="/profile" className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-medium transition text-sm">
+                View Profile
+              </Link>
+            )}
           </div>
         </div>
       </div>
 
+      {/* Watch History Section */}
+      {watchHistory.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+          <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-purple-500" />
+            Continue Watching
+          </h2>
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {watchHistory.slice(0, 10).map((item) => (
+              <Link key={item.id} to={`/watch/${item.animeId}?episode=${item.episodeId}`} className="flex-shrink-0 w-48 group">
+                <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+                  {item.image ? (
+                    <img
+                      src={item.image.startsWith('http') ? item.image : `${BACKEND_ORIGIN}${item.image}`}
+                      alt={item.title}
+                      className="w-full h-28 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-28 bg-slate-700 flex items-center justify-center">
+                      <span className="text-gray-500 text-xs">No Image</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                    <Play className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-medium text-xs line-clamp-2">{item.title}</h3>
+                    <p className="text-xs text-gray-400 mt-1">Episode {item.episode}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Trending Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
-        <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+        <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
           <span className="text-purple-500">🔥</span> Trending Now
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-5">
-          {animeList.slice(0, 5).map((anime) => (
-            <Link key={anime.id} to={`/anime/${anime.id}`} className="group">
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          {animeList.slice(0, 10).map((anime) => (
+            <Link key={anime.id} to={`/anime/${anime.id}`} className="flex-shrink-0 w-40 group">
               <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
                 {anime.image_url ? (
                   <img
                     src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                     alt={anime.title}
-                    className="w-full h-44 md:h-56 object-cover"
+                    className="w-full h-56 object-cover"
                     onError={(e) => {
                       console.error('Image load error:', anime.image_url);
                       e.target.style.display = 'none';
@@ -84,18 +141,18 @@ export default function Home() {
                     }}
                   />
                 ) : (
-                  <div className="w-full h-44 md:h-56 bg-slate-700 flex items-center justify-center">
-                    <span className="text-gray-500 text-sm">No Image</span>
+                  <div className="w-full h-56 bg-slate-700 flex items-center justify-center">
+                    <span className="text-gray-500 text-xs">No Image</span>
                   </div>
                 )}
-                <div className="fallback-image w-full h-44 md:h-56 bg-slate-700 flex items-center justify-center hidden">
-                  <span className="text-gray-500 text-sm">Image Error</span>
+                <div className="fallback-image w-full h-56 bg-slate-700 flex items-center justify-center hidden">
+                  <span className="text-gray-500 text-xs">Image Error</span>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                  <Play className="w-6 md:w-8 h-6 md:h-8 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                  <Play className="w-6 h-6 text-white" />
                 </div>
-                <div className="p-2 md:p-3">
-                  <h3 className="font-medium text-xs md:text-sm line-clamp-2">{anime.title}</h3>
+                <div className="p-2">
+                  <h3 className="font-medium text-xs line-clamp-2">{anime.title}</h3>
                   <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
                     <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                     <span>{anime.rating || 0}</span>
@@ -107,17 +164,61 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Latest Updates Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+        <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
+          <span className="text-purple-500">📺</span> Latest Updates
+        </h2>
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          {animeList.slice(0, 10).map((anime) => (
+            <Link key={anime.id} to={`/anime/${anime.id}`} className="flex-shrink-0 w-40 group">
+              <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+                {anime.image_url ? (
+                  <img
+                    src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
+                    alt={anime.title}
+                    className="w-full h-56 object-cover"
+                    onError={(e) => {
+                      console.error('Image load error:', anime.image_url);
+                      e.target.style.display = 'none';
+                      e.target.parentElement.querySelector('.fallback-image')?.style.setProperty('display', 'flex');
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-56 bg-slate-700 flex items-center justify-center">
+                    <span className="text-gray-500 text-xs">No Image</span>
+                  </div>
+                )}
+                <div className="fallback-image w-full h-56 bg-slate-700 flex items-center justify-center hidden">
+                  <span className="text-gray-500 text-xs">Image Error</span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                  <Play className="w-6 h-6 text-white" />
+                </div>
+                <div className="p-2">
+                  <h3 className="font-medium text-xs line-clamp-2">{anime.title}</h3>
+                  <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
+                    <Calendar className="w-3 h-3" />
+                    <span>Ep {anime.episodes}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Genre Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-        <h2 className="text-xl md:text-2xl font-bold mb-5 flex items-center gap-2">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+        <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
           <span className="text-purple-500">🎭</span> Browse by Genre
         </h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
           {['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Slice of Life', 'Supernatural', 'Thriller'].map((genre) => (
             <Link
               key={genre}
               to={`/browse?genre=${genre.toLowerCase()}`}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-purple-600 rounded-full text-xs md:text-sm font-medium transition"
+              className="flex-shrink-0 px-4 py-2 bg-slate-800 hover:bg-purple-600 rounded-full text-xs md:text-sm font-medium transition whitespace-nowrap"
             >
               {genre}
             </Link>
@@ -125,46 +226,51 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Latest Updates */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-        <h2 className="text-xl md:text-2xl font-bold mb-5 flex items-center gap-2">
-          <span className="text-purple-500">📺</span> Latest Updates
+      {/* Movies Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+        <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
+          <Film className="w-5 h-5 text-purple-500" />
+          Movies
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
-          {animeList.slice(0, 3).map((anime) => (
-            <Link key={anime.id} to={`/anime/${anime.id}`} className="flex gap-3 bg-slate-800 rounded-xl overflow-hidden hover:bg-slate-700 transition">
-              {anime.image_url ? (
-                <img
-                  src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
-                  alt={anime.title}
-                  className="w-20 md:w-28 h-16 md:h-20 object-cover"
-                  onError={(e) => {
-                    console.error('Image load error:', anime.image_url);
-                    e.target.style.display = 'none';
-                    e.target.parentElement.querySelector('.fallback-image')?.style.setProperty('display', 'flex');
-                  }}
-                />
-              ) : (
-                <div className="w-20 md:w-28 h-16 md:h-20 bg-slate-700 flex items-center justify-center">
-                  <span className="text-gray-500 text-xs">No Image</span>
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          {animeList.filter(anime => anime.type === 'Movie').slice(0, 10).map((anime) => (
+            <Link key={anime.id} to={`/anime/${anime.id}`} className="flex-shrink-0 w-40 group">
+              <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+                {anime.image_url ? (
+                  <img
+                    src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
+                    alt={anime.title}
+                    className="w-full h-56 object-cover"
+                    onError={(e) => {
+                      console.error('Image load error:', anime.image_url);
+                      e.target.style.display = 'none';
+                      e.target.parentElement.querySelector('.fallback-image')?.style.setProperty('display', 'flex');
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-56 bg-slate-700 flex items-center justify-center">
+                    <span className="text-gray-500 text-xs">No Image</span>
+                  </div>
+                )}
+                <div className="fallback-image w-full h-56 bg-slate-700 flex items-center justify-center hidden">
+                  <span className="text-gray-500 text-xs">Image Error</span>
                 </div>
-              )}
-              <div className="fallback-image w-20 md:w-28 h-16 md:h-20 bg-slate-700 flex items-center justify-center hidden">
-                <span className="text-gray-500 text-xs">Image Error</span>
-              </div>
-              <div className="p-2.5 flex-1">
-                <h3 className="font-medium text-sm line-clamp-2">{anime.title}</h3>
-                <div className="flex items-center gap-1.5 mt-1.5 text-xs text-gray-400">
-                  <Calendar className="w-3 h-3" />
-                  <span>Episode {anime.episodes}</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                  <Play className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-400">
-                  <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                  <span>{anime.rating || 0}</span>
+                <div className="p-2">
+                  <h3 className="font-medium text-xs line-clamp-2">{anime.title}</h3>
+                  <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
+                    <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                    <span>{anime.rating || 0}</span>
+                  </div>
                 </div>
               </div>
             </Link>
           ))}
+          {animeList.filter(anime => anime.type === 'Movie').length === 0 && (
+            <p className="text-gray-400 text-sm">No movies available</p>
+          )}
         </div>
       </div>
     </div>
