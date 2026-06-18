@@ -96,23 +96,26 @@ export default function Home() {
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
               {watchHistory.slice(0, 10).map((item) => (
                 <Link key={item.id} to={`/watch/${item.animeId}?episode=${item.episodeId}`} className="flex-shrink-0 w-48 group">
-                  <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+                  <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
                     {item.image ? (
                       <img
                         src={item.image.startsWith('http') ? item.image : `${BACKEND_ORIGIN}${item.image}`}
                         alt={item.title}
-                        className="w-full h-28 object-cover"
+                        className="w-full h-28 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-28 bg-slate-700 flex items-center justify-center">
                         <span className="text-gray-500 text-xs">No Image</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                      <Play className="w-6 h-6 text-white" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                      <div className="flex items-center gap-2 bg-purple-600/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium">
+                        <Play className="w-3 h-3" />
+                        Watch
+                      </div>
                     </div>
                     <div className="p-3">
-                      <h3 className="font-medium text-xs line-clamp-2">{item.title}</h3>
+                      <h3 className="font-medium text-xs line-clamp-2 group-hover:text-purple-400 transition-colors">{item.title}</h3>
                       <p className="text-xs text-gray-400 mt-1">Episode {item.episode}</p>
                     </div>
                   </div>
@@ -133,12 +136,12 @@ export default function Home() {
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
           {animeList.slice(0, 10).map((anime) => (
             <Link key={anime.id} to={`/anime/${anime.id}`} className="flex-shrink-0 w-40 group">
-              <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+              <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
                 {anime.image_url ? (
                   <img
                     src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                     alt={anime.title}
-                    className="w-full h-56 object-cover"
+                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       console.error('Image load error:', anime.image_url);
                       e.target.style.display = 'none';
@@ -153,11 +156,14 @@ export default function Home() {
                 <div className="fallback-image w-full h-56 bg-slate-700 flex items-center justify-center hidden">
                   <span className="text-gray-500 text-xs">Image Error</span>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                  <Play className="w-6 h-6 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                  <div className="flex items-center gap-2 bg-purple-600/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium">
+                    <Play className="w-3 h-3" />
+                    Watch
+                  </div>
                 </div>
                 <div className="p-2">
-                  <h3 className="font-medium text-xs line-clamp-2">{anime.title}</h3>
+                  <h3 className="font-medium text-xs line-clamp-2 group-hover:text-purple-400 transition-colors">{anime.title}</h3>
                   <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
                     <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                     <span>{anime.rating || 0}</span>
@@ -179,12 +185,12 @@ export default function Home() {
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
           {animeList.slice(0, 10).map((anime) => (
             <Link key={anime.id} to={`/anime/${anime.id}`} className="flex-shrink-0 w-40 group">
-              <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+              <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
                 {anime.image_url ? (
                   <img
                     src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                     alt={anime.title}
-                    className="w-full h-56 object-cover"
+                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       console.error('Image load error:', anime.image_url);
                       e.target.style.display = 'none';
@@ -199,11 +205,14 @@ export default function Home() {
                 <div className="fallback-image w-full h-56 bg-slate-700 flex items-center justify-center hidden">
                   <span className="text-gray-500 text-xs">Image Error</span>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                  <Play className="w-6 h-6 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                  <div className="flex items-center gap-2 bg-purple-600/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium">
+                    <Play className="w-3 h-3" />
+                    Watch
+                  </div>
                 </div>
                 <div className="p-2">
-                  <h3 className="font-medium text-xs line-clamp-2">{anime.title}</h3>
+                  <h3 className="font-medium text-xs line-clamp-2 group-hover:text-purple-400 transition-colors">{anime.title}</h3>
                   <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
                     <Calendar className="w-3 h-3" />
                     <span>Ep {anime.episodes}</span>
@@ -246,12 +255,12 @@ export default function Home() {
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
           {animeList.filter(anime => anime.type === 'Movie').slice(0, 10).map((anime) => (
             <Link key={anime.id} to={`/anime/${anime.id}`} className="flex-shrink-0 w-40 group">
-              <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+              <div className="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
                 {anime.image_url ? (
                   <img
                     src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                     alt={anime.title}
-                    className="w-full h-56 object-cover"
+                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       console.error('Image load error:', anime.image_url);
                       e.target.style.display = 'none';
@@ -266,11 +275,14 @@ export default function Home() {
                 <div className="fallback-image w-full h-56 bg-slate-700 flex items-center justify-center hidden">
                   <span className="text-gray-500 text-xs">Image Error</span>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                  <Play className="w-6 h-6 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                  <div className="flex items-center gap-2 bg-purple-600/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium">
+                    <Play className="w-3 h-3" />
+                    Watch
+                  </div>
                 </div>
                 <div className="p-2">
-                  <h3 className="font-medium text-xs line-clamp-2">{anime.title}</h3>
+                  <h3 className="font-medium text-xs line-clamp-2 group-hover:text-purple-400 transition-colors">{anime.title}</h3>
                   <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
                     <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                     <span>{anime.rating || 0}</span>
