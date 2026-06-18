@@ -25,28 +25,28 @@ export default function Genre() {
   return (
     <div className="min-h-screen bg-slate-900">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-16">
+      <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-10 md:py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-4 mb-4">
-            <img src="/logo.png" alt="WorldEnd Stream" className="w-12 h-12 object-contain" />
-            <h1 className="text-5xl font-bold">Browse by Genre</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <img src="/logo.png" alt="WorldEnd Stream" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+            <h1 className="text-2xl md:text-4xl font-bold">Browse by Genre</h1>
           </div>
-          <p className="text-xl text-gray-300">Find anime by your favorite genre</p>
+          <p className="text-base md:text-lg text-gray-300">Find anime by your favorite genre</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
           {genres.map((genre) => (
             <Link
               key={genre}
               to={`/browse?genre=${genre.toLowerCase()}`}
               className="group"
             >
-              <div className={`relative aspect-[3/4] rounded-lg overflow-hidden bg-gradient-to-br ${genreColors[genre]} hover:scale-105 transition-transform duration-300`}>
+              <div className={`relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br ${genreColors[genre]} hover:scale-[1.02] transition-transform duration-300`}>
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white text-center px-4">
+                  <h2 className="text-xl md:text-2xl font-bold text-white text-center px-4">
                     {genre}
                   </h2>
                 </div>
