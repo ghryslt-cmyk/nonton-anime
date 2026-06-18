@@ -211,8 +211,8 @@ export default function Watch() {
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
             <div className="text-center">
-              <div className="w-24 h-24 bg-teal-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Play className="w-12 h-12 text-teal-500" />
+              <div className="w-24 h-24 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Play className="w-12 h-12 text-purple-500" />
               </div>
               <p className="text-gray-400">Video Player Placeholder</p>
               <p className="text-sm text-gray-500 mt-2">{anime.title} - Episode {currentEpisode?.episode_number || 1}</p>
@@ -228,7 +228,7 @@ export default function Watch() {
             <div className="mb-4">
               <div className="h-1 bg-slate-600 rounded-full cursor-pointer" onClick={handleSeek}>
                 <div
-                  className="h-full bg-teal-500 rounded-full relative"
+                  className="h-full bg-purple-500 rounded-full relative"
                   style={{ width: `${progress}%` }}
                 >
                   <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full" />
@@ -290,7 +290,7 @@ export default function Watch() {
             <p className="text-gray-400 mb-6">Episode 1 - {anime.description}</p>
 
             <div className="flex gap-4 mb-8">
-              <button className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 px-6 py-3 rounded-lg transition">
+              <button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition">
                 <Heart className="w-5 h-5" />
                 Add to Favorites
               </button>
@@ -310,7 +310,7 @@ export default function Watch() {
                       key={episode.id}
                       to={`/watch/${anime.id}?episode=${episode.id}`}
                       className={`w-full flex items-center gap-4 p-4 rounded-lg transition ${
-                        currentEpisode?.id === episode.id ? 'bg-teal-600' : 'bg-slate-800 hover:bg-slate-700'
+                        currentEpisode?.id === episode.id ? 'bg-purple-600' : 'bg-slate-800 hover:bg-slate-700'
                       }`}
                     >
                       <Play className="w-5 h-5" />
@@ -327,7 +327,7 @@ export default function Watch() {
                       key={i + 1}
                       to={`/watch/${anime.id}`}
                       className={`w-full flex items-center gap-4 p-4 rounded-lg transition ${
-                        i === 0 ? 'bg-teal-600' : 'bg-slate-800 hover:bg-slate-700'
+                        i === 0 ? 'bg-purple-600' : 'bg-slate-800 hover:bg-slate-700'
                       }`}
                     >
                       <Play className="w-5 h-5" />
@@ -358,7 +358,7 @@ export default function Watch() {
               {/* Comment Form */}
               <form onSubmit={handleSubmitComment} className="mb-6">
                 <div className="flex gap-3">
-                  <div className="w-10 h-10 bg-teal-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
+                  <div className="w-10 h-10 bg-purple-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
                     {authAPI.getCurrentUser()?.name?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1">
@@ -366,13 +366,13 @@ export default function Watch() {
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Add a comment..."
-                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
                       rows="2"
                     />
                     <button
                       type="submit"
                       disabled={submittingComment}
-                      className="mt-2 flex items-center gap-2 bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg transition disabled:opacity-50"
+                      className="mt-2 flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition disabled:opacity-50"
                     >
                       <Send className="w-4 h-4" />
                       {submittingComment ? 'Posting...' : 'Post Comment'}
@@ -386,7 +386,7 @@ export default function Watch() {
                 {comments.length > 0 ? (
                   comments.map((comment) => (
                     <div key={comment.id} className="flex gap-3">
-                      <div className="w-10 h-10 bg-teal-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
+                      <div className="w-10 h-10 bg-purple-600 rounded-full flex-shrink-0 flex items-center justify-center font-semibold">
                         {comment.user_name?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div className="flex-1">
