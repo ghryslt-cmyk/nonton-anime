@@ -232,7 +232,7 @@ export default function Home() {
           <span className="text-purple-500">🎭</span> Browse by Genre
         </h2>
         <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-          {['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Slice of Life', 'Supernatural', 'Thriller'].map((genre) => (
+          {['Action', 'Adventure', 'Comedy', 'Drama', 'Ecchi', 'Fantasy', 'Game', 'Harem', 'Historical', 'Horror', 'Josei', 'Magic', 'Martial Arts', 'Mecha', 'Military', 'Music', 'Mystery', 'Parody', 'Police', 'Psychological', 'Romance', 'Samurai', 'School', 'Sci-Fi', 'Seinen', 'Shoujo', 'Shoujo Ai', 'Shounen', 'Slice of Life', 'Space', 'Sports', 'Super Power', 'Supernatural', 'Thriller', 'Vampire'].map((genre) => (
             <Link
               key={genre}
               to={`/browse?genre=${genre.toLowerCase()}`}
