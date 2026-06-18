@@ -135,7 +135,7 @@ export default function Profile() {
             <div className="bg-slate-800 rounded-2xl p-8 mb-8">
               <div className="flex items-center gap-6 mb-8">
                 <div className="relative">
-                  <div className="w-24 h-24 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full flex items-center justify-center text-4xl font-bold overflow-hidden">
+                  <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-4xl font-bold overflow-hidden">
                     {profilePhoto ? (
                       <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
@@ -143,7 +143,7 @@ export default function Profile() {
                     )}
                   </div>
                   {editing && (
-                    <label className="absolute bottom-0 right-0 bg-teal-600 p-2 rounded-full cursor-pointer hover:bg-teal-700 transition">
+                    <label className="absolute bottom-0 right-0 bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition">
                       <Camera className="w-4 h-4" />
                       <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                     </label>
@@ -156,13 +156,13 @@ export default function Profile() {
                         type="text"
                         value={editForm.name}
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                       <input
                         type="email"
                         value={editForm.email}
                         onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                        className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                   ) : (
@@ -185,7 +185,7 @@ export default function Profile() {
                       <button
                         onClick={handleSaveProfile}
                         disabled={saving}
-                        className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg transition disabled:opacity-50"
+                        className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition disabled:opacity-50"
                       >
                         <Save className="w-5 h-5" />
                         {saving ? 'Saving...' : 'Save'}
@@ -200,7 +200,7 @@ export default function Profile() {
                     </>
                   ) : (
                     <>
-                      <button onClick={handleEditProfile} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg transition">
+                      <button onClick={handleEditProfile} className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition">
                         <Settings className="w-5 h-5" />
                         Edit Profile
                       </button>
@@ -215,7 +215,7 @@ export default function Profile() {
 
               <div className="grid grid-cols-3 gap-6">
                 <div className="bg-slate-700 rounded-lg p-6 text-center">
-                  <Heart className="w-8 h-8 mx-auto mb-2 text-teal-400" />
+                  <Heart className="w-8 h-8 mx-auto mb-2 text-purple-400" />
                   <p className="text-3xl font-bold">{user.favorites_count || 0}</p>
                   <p className="text-gray-400">Favorites</p>
                 </div>
@@ -235,14 +235,14 @@ export default function Profile() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="bg-slate-800 rounded-lg p-6">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-teal-400" />
+                  <Heart className="w-5 h-5 text-purple-400" />
                   Favorite Anime
                 </h2>
                 <div className="space-y-4">
                   {favorites.map((anime) => (
                     <Link key={anime.id} to={`/anime/${anime.id}`} className="flex gap-4 bg-slate-700 rounded-lg p-4 hover:bg-slate-600 transition">
                       {anime.image_url ? (
-                        <img src={`${BACKEND_ORIGIN}${anime.image_url}`} alt={anime.title} className="w-16 h-24 object-cover rounded" />
+                        <img src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`} alt={anime.title} className="w-16 h-24 object-cover rounded" />
                       ) : (
                         <div className="w-16 h-24 bg-slate-600 rounded"></div>
                       )}
