@@ -10,6 +10,7 @@ import Profile from './pages/Profile'
 import BrowseAll from './pages/BrowseAll'
 import Trending from './pages/Trending'
 import Popular from './pages/Popular'
+import JadwalRilis from './pages/JadwalRilis'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/browse" element={<BrowseAll />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/popular" element={<Popular />} />
+          <Route path="/jadwal-rilis" element={<JadwalRilis />} />
           <Route path="/anime/:id" element={<AnimeDetail />} />
           <Route path="/watch/:id" element={<Watch />} />
           <Route path="/login" element={<Login />} />
