@@ -40,23 +40,23 @@ export default function Trending() {
   return (
     <div className="min-h-screen bg-slate-900">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-16">
+      <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-10 md:py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-4 mb-4">
-            <img src="/logo.png" alt="WorldEnd Stream" className="w-12 h-12 object-contain" />
-            <h1 className="text-5xl font-bold">Trending Now</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <img src="/logo.png" alt="WorldEnd Stream" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+            <h1 className="text-2xl md:text-4xl font-bold">Trending Now</h1>
           </div>
-          <p className="text-xl text-gray-300">Most popular anime this week</p>
+          <p className="text-base md:text-lg text-gray-300">Most popular anime this week</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {anime.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
             {anime.map((anime, index) => (
               <Link key={anime.id} to={`/anime/${anime.id}`} className="group">
-                <div className="bg-slate-800 rounded-lg overflow-hidden hover:shadow-xl hover:shadow-pink-500/20 transition-all duration-300 relative">
-                  <div className="absolute top-2 left-2 bg-pink-600 text-white px-3 py-1 rounded-full text-sm font-bold z-10">
+                <div className="bg-slate-800 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 relative">
+                  <div className="absolute top-2.5 left-2.5 bg-pink-600 text-white px-2 py-0.5 rounded-full text-[10px] font-bold z-10">
                     #{index + 1}
                   </div>
                   <div className="relative aspect-[3/4] overflow-hidden">
@@ -64,7 +64,7 @@ export default function Trending() {
                       <img
                         src={anime.image_url.startsWith('http') ? anime.image_url : `${BACKEND_ORIGIN}${anime.image_url}`}
                         alt={anime.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           console.error('Image load error:', anime.image_url);
                           e.target.style.display = 'none';
@@ -73,31 +73,31 @@ export default function Trending() {
                       />
                     ) : (
                       <div className="w-full h-full bg-slate-700 flex items-center justify-center">
-                        <span className="text-gray-500">No Image</span>
+                        <span className="text-gray-500 text-sm">No Image</span>
                       </div>
                     )}
                     <div className="fallback-image w-full h-full bg-slate-700 flex items-center justify-center hidden">
-                      <span className="text-gray-500">Image Error</span>
+                      <span className="text-gray-500 text-sm">Image Error</span>
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <div className="flex items-center gap-2 bg-pink-600 px-3 py-1 rounded-full text-sm font-semibold">
-                          <Play className="w-4 h-4" />
-                          Watch Now
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <div className="flex items-center gap-2 bg-pink-600/90 backdrop-blur px-3 py-2 rounded-full text-xs font-medium">
+                          <Play className="w-3 h-3" />
+                          Watch
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-pink-400 transition">
+                  <div className="p-2.5">
+                    <h3 className="font-medium text-xs md:text-sm line-clamp-2 group-hover:text-pink-400 transition">
                       {anime.title}
                     </h3>
-                    <div className="flex items-center justify-between text-sm text-gray-400">
+                    <div className="flex items-center justify-between mt-1.5 text-xs text-gray-400">
                       <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                         <span>{anime.rating || 'N/A'}</span>
                       </div>
-                      <span className="px-2 py-1 bg-slate-700 rounded text-xs">
+                      <span className="px-2 py-0.5 bg-slate-700 rounded text-[10px]">
                         {anime.status}
                       </span>
                     </div>
@@ -108,7 +108,7 @@ export default function Trending() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">No trending anime found</p>
+            <p className="text-gray-400 text-base">No trending anime found</p>
           </div>
         )}
       </div>
