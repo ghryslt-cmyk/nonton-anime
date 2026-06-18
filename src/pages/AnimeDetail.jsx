@@ -154,7 +154,7 @@ export default function AnimeDetail() {
             <div className="flex gap-4 mb-8">
               <Link
                 to={`/watch/${anime.id}`}
-                className="flex-1 bg-teal-600 hover:bg-teal-700 py-4 rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                className="flex-1 bg-purple-600 hover:bg-purple-700 py-4 rounded-lg font-semibold transition flex items-center justify-center gap-2"
               >
                 <Play className="w-6 h-6" />
                 Watch Now
@@ -204,7 +204,7 @@ export default function AnimeDetail() {
                     <Link
                       key={episode.id}
                       to={`/watch/${anime.id}?episode=${episode.id}`}
-                      className="bg-slate-800 hover:bg-teal-600 p-3 rounded-lg text-center transition"
+                      className="bg-slate-800 hover:bg-purple-600 p-3 rounded-lg text-center transition"
                     >
                       {episode.episode_number}
                     </Link>
@@ -214,7 +214,7 @@ export default function AnimeDetail() {
                     <Link
                       key={i + 1}
                       to={`/watch/${anime.id}`}
-                      className="bg-slate-800 hover:bg-teal-600 p-3 rounded-lg text-center transition"
+                      className="bg-slate-800 hover:bg-purple-600 p-3 rounded-lg text-center transition"
                     >
                       {i + 1}
                     </Link>
@@ -258,14 +258,14 @@ export default function AnimeDetail() {
                       value={reviewForm.comment}
                       onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                       placeholder="Share your thoughts about this anime..."
-                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                      className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
                       rows="3"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={submittingReview}
-                    className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 px-6 py-2 rounded-lg transition disabled:opacity-50"
+                    className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg transition disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
                     {submittingReview ? 'Submitting...' : 'Submit Review'}
@@ -280,7 +280,7 @@ export default function AnimeDetail() {
                     <div key={review.id} className="bg-slate-800 rounded-lg p-6">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center font-semibold">
+                          <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center font-semibold">
                             {review.user_name ? review.user_name[0] : 'U'}
                           </div>
                           <div>
