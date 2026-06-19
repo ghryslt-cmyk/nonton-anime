@@ -206,6 +206,9 @@ async function initializeDatabase() {
         status TEXT,
         image_url TEXT,
         rating REAL DEFAULT 0,
+        release_day TEXT,
+        next_episode_date DATE,
+        next_episode_number INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         created_by INTEGER,
         FOREIGN KEY (created_by) REFERENCES users(id)
@@ -356,6 +359,9 @@ const animeSchema = Joi.object({
   status: Joi.string().valid('Ongoing', 'Completed', 'Upcoming').required(),
   video_url: Joi.string().uri().allow(''),
   video_platform: Joi.string().valid('file', 'youtube', 'vimeo', 'other').default('file'),
+  release_day: Joi.string().valid('Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu').allow(''),
+  next_episode_date: Joi.date().allow(''),
+  next_episode_number: Joi.number().integer().min(1).max(5000).allow('')
 });
 
 const episodeSchema = Joi.object({
@@ -520,6 +526,19 @@ app.get('/api/anime', async (req, res) => {
   }
 });
 
+app.get('/api/anime/ongoing', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT * FROM anime 
+      WHERE status = 'Ongoing' 
+      ORDER BY release_day, next_episode_date ASC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 app.get('/api/anime/:id', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM anime WHERE id = $1', [req.params.id]);
@@ -542,13 +561,13 @@ app.post('/api/anime', authenticateToken, requireAdmin, upload.fields([
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { title, description, genres, year, episodes, status, video_url, video_platform } = value;
+    const { title, description, genres, year, episodes, status, video_url, video_platform, release_day, next_episode_date, next_episode_number } = value;
     const imageUrl = req.files['image'] ? `/uploads/images/${req.files['image'][0].filename}` : null;
 
     const result = await pool.query(
-      `INSERT INTO anime (title, description, genres, year, episodes, status, image_url, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [title, description, genres, year, episodes, status, imageUrl, req.user.id]
+      `INSERT INTO anime (title, description, genres, year, episodes, status, image_url, release_day, next_episode_date, next_episode_number, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+      [title, description, genres, year, episodes, status, imageUrl, release_day || null, next_episode_date || null, next_episode_number || null, req.user.id]
     );
 
     // If video URL was provided, create first episode
@@ -571,11 +590,29 @@ app.post('/api/anime', authenticateToken, requireAdmin, upload.fields([
         episodes,
         status,
         image_url: imageUrl,
-        video_url: video_url
+        video_url: video_url,
+        release_day,
+        next_episode_date,
+        next_episode_number
       }
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.patch('/api/anime/:id/schedule', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { release_day, next_episode_date, next_episode_number } = req.body;
+    
+    await pool.query(
+      `UPDATE anime SET release_day = $1, next_episode_date = $2, next_episode_number = $3 WHERE id = $4`,
+      [release_day || null, next_episode_date || null, next_episode_number || null, req.params.id]
+    );
+    
+    res.json({ message: 'Schedule updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update schedule' });
   }
 });
 
