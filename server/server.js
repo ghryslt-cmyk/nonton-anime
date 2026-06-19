@@ -220,6 +220,10 @@ async function initializeDatabase() {
         episode_number INTEGER NOT NULL,
         title TEXT,
         video_url TEXT,
+        video_url_360p TEXT,
+        video_url_480p TEXT,
+        video_url_720p TEXT,
+        video_url_1080p TEXT,
         video_platform TEXT DEFAULT 'file',
         duration INTEGER,
         release_date DATE,
@@ -358,6 +362,10 @@ const episodeSchema = Joi.object({
   episode_number: Joi.number().integer().min(1).max(5000).required(),
   title: Joi.string().max(200).allow(''),
   video_url: Joi.string().uri().allow(''),
+  video_url_360p: Joi.string().uri().allow(''),
+  video_url_480p: Joi.string().uri().allow(''),
+  video_url_720p: Joi.string().uri().allow(''),
+  video_url_1080p: Joi.string().uri().allow(''),
   video_platform: Joi.string().valid('file', 'youtube', 'vimeo', 'other').default('file'),
   duration: Joi.number().integer().min(1).max(14400).allow(''),
   release_date: Joi.date().allow('')
@@ -625,17 +633,17 @@ app.post('/api/anime/:id/episodes', authenticateToken, requireAdmin, async (req,
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { episode_number, title, video_url, video_platform, duration, release_date } = value;
+    const { episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, duration, release_date } = value;
 
     const result = await pool.query(
-      `INSERT INTO episodes (anime_id, episode_number, title, video_url, video_platform, duration, release_date)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-      [req.params.id, episode_number, title, video_url, video_platform || 'other', duration || 1440, release_date || null]
+      `INSERT INTO episodes (anime_id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, duration, release_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+      [req.params.id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform || 'other', duration || 1440, release_date || null]
     );
 
     res.json({
       message: 'Episode created successfully',
-      episode: { id: result.rows[0].id, episode_number, title, video_url, video_platform, release_date }
+      episode: { id: result.rows[0].id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, release_date }
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

@@ -13,6 +13,10 @@ export default function Admin() {
     episode_number: '',
     title: '',
     video_url: '',
+    video_url_360p: '',
+    video_url_480p: '',
+    video_url_720p: '',
+    video_url_1080p: '',
     video_platform: 'youtube',
     release_date: ''
   })
@@ -184,6 +188,10 @@ export default function Admin() {
         episode_number: parseInt(episodeForm.episode_number),
         title: episodeForm.title,
         video_url: episodeForm.video_url,
+        video_url_360p: episodeForm.video_url_360p,
+        video_url_480p: episodeForm.video_url_480p,
+        video_url_720p: episodeForm.video_url_720p,
+        video_url_1080p: episodeForm.video_url_1080p,
         video_platform: episodeForm.video_platform,
         release_date: episodeForm.release_date || null
       }
@@ -193,6 +201,10 @@ export default function Admin() {
         episode_number: '',
         title: '',
         video_url: '',
+        video_url_360p: '',
+        video_url_480p: '',
+        video_url_720p: '',
+        video_url_1080p: '',
         video_platform: 'youtube',
         release_date: ''
       })
@@ -547,12 +559,52 @@ export default function Admin() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs md:text-sm font-medium mb-2">Video URL</label>
+                          <label className="block text-xs md:text-sm font-medium mb-2">Video URL (Default)</label>
                           <input
                             type="url"
                             value={episodeForm.video_url}
                             onChange={(e) => setEpisodeForm({ ...episodeForm, video_url: e.target.value })}
-                            placeholder="https://youtube.com/watch?v=..."
+                            placeholder="https://example.com/video.mp4"
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs md:text-sm font-medium mb-2">Video URL 360p (Optional)</label>
+                          <input
+                            type="url"
+                            value={episodeForm.video_url_360p}
+                            onChange={(e) => setEpisodeForm({ ...episodeForm, video_url_360p: e.target.value })}
+                            placeholder="https://example.com/video_360p.mp4"
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs md:text-sm font-medium mb-2">Video URL 480p (Optional)</label>
+                          <input
+                            type="url"
+                            value={episodeForm.video_url_480p}
+                            onChange={(e) => setEpisodeForm({ ...episodeForm, video_url_480p: e.target.value })}
+                            placeholder="https://example.com/video_480p.mp4"
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs md:text-sm font-medium mb-2">Video URL 720p (Optional)</label>
+                          <input
+                            type="url"
+                            value={episodeForm.video_url_720p}
+                            onChange={(e) => setEpisodeForm({ ...episodeForm, video_url_720p: e.target.value })}
+                            placeholder="https://example.com/video_720p.mp4"
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs md:text-sm font-medium mb-2">Video URL 1080p (Optional)</label>
+                          <input
+                            type="url"
+                            value={episodeForm.video_url_1080p}
+                            onChange={(e) => setEpisodeForm({ ...episodeForm, video_url_1080p: e.target.value })}
+                            placeholder="https://example.com/video_1080p.mp4"
                             className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                           />
                         </div>

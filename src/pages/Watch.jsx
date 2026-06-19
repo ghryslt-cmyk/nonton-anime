@@ -41,6 +41,7 @@ export default function Watch() {
   const [submittingComment, setSubmittingComment] = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [selectedQuality, setSelectedQuality] = useState('default')
   const [reportForm, setReportForm] = useState({
     report_type: 'broken_link',
     description: ''
@@ -203,6 +204,33 @@ export default function Watch() {
 
   const progress = (currentTime / duration) * 100
 
+  const getVideoUrl = () => {
+    if (!currentEpisode) return null
+    
+    switch (selectedQuality) {
+      case '360p':
+        return currentEpisode.video_url_360p || currentEpisode.video_url
+      case '480p':
+        return currentEpisode.video_url_480p || currentEpisode.video_url
+      case '720p':
+        return currentEpisode.video_url_720p || currentEpisode.video_url
+      case '1080p':
+        return currentEpisode.video_url_1080p || currentEpisode.video_url
+      default:
+        return currentEpisode.video_url
+    }
+  }
+
+  const availableQualities = () => {
+    if (!currentEpisode) return ['default']
+    const qualities = ['default']
+    if (currentEpisode.video_url_360p) qualities.push('360p')
+    if (currentEpisode.video_url_480p) qualities.push('480p')
+    if (currentEpisode.video_url_720p) qualities.push('720p')
+    if (currentEpisode.video_url_1080p) qualities.push('1080p')
+    return qualities
+  }
+
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Video Player */}
@@ -227,16 +255,41 @@ export default function Watch() {
               allowFullScreen
             />
           ) : (
-            <video
-              ref={videoRef}
-              src={currentEpisode.video_url}
-              className="w-full h-full"
-              onTimeUpdate={handleTimeUpdate}
-              onLoadedMetadata={handleLoadedMetadata}
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              controls
-            />
+            <>
+              <video
+                ref={videoRef}
+                src={getVideoUrl()}
+                className="w-full h-full"
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                controls
+              />
+              {availableQualities().length > 1 && (
+                <div className="absolute top-4 right-4 bg-black/70 backdrop-blur rounded-lg p-2">
+                  <select
+                    value={selectedQuality}
+                    onChange={(e) => {
+                      const currentTime = videoRef.current?.currentTime || 0
+                      setSelectedQuality(e.target.value)
+                      setTimeout(() => {
+                        if (videoRef.current) {
+                          videoRef.current.currentTime = currentTime
+                          videoRef.current.play()
+                        }
+                      }, 100)
+                    }}
+                    className="bg-slate-800 text-white px-3 py-1 rounded text-sm focus:outline-none"
+                  >
+                    <option value="default">Auto</option>
+                    {availableQualities().filter(q => q !== 'default').map(quality => (
+                      <option key={quality} value={quality}>{quality}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </>
           )
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
