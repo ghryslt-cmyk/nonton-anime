@@ -270,6 +270,23 @@ async function initializeDatabase() {
       )
     `);
 
+    // Reports table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS reports (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        anime_id INTEGER,
+        episode_id INTEGER,
+        report_type TEXT NOT NULL,
+        description TEXT,
+        status TEXT DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE,
+        FOREIGN KEY (episode_id) REFERENCES episodes(id) ON DELETE CASCADE
+      )
+    `);
+
     // Settings table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS settings (
@@ -349,6 +366,13 @@ const episodeSchema = Joi.object({
 const reviewSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required(),
   comment: Joi.string().max(1000).allow(''),
+});
+
+const reportSchema = Joi.object({
+  anime_id: Joi.number().integer().required(),
+  episode_id: Joi.number().integer().allow(null),
+  report_type: Joi.string().valid('broken_link', 'wrong_episode', 'poor_quality', 'other').required(),
+  description: Joi.string().max(1000).allow('')
 });
 
 // Middleware to verify JWT token
@@ -624,6 +648,62 @@ app.delete('/api/anime/:id/episodes/:episodeId', authenticateToken, requireAdmin
     res.json({ message: 'Episode deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete episode' });
+  }
+});
+
+// Reports Routes
+app.post('/api/reports', authenticateToken, async (req, res) => {
+  try {
+    const { error, value } = reportSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { anime_id, episode_id, report_type, description } = value;
+    const userId = req.user.id;
+
+    const result = await pool.query(
+      `INSERT INTO reports (user_id, anime_id, episode_id, report_type, description)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      [userId, anime_id, episode_id, report_type, description]
+    );
+
+    res.json({
+      message: 'Report submitted successfully',
+      report: { id: result.rows[0].id, report_type, status: 'pending' }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/reports', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT r.*, u.username, a.title as anime_title, e.episode_number
+      FROM reports r
+      LEFT JOIN users u ON r.user_id = u.id
+      LEFT JOIN anime a ON r.anime_id = a.id
+      LEFT JOIN episodes e ON r.episode_id = e.id
+      ORDER BY r.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+app.patch('/api/reports/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['pending', 'resolved', 'dismissed'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    await pool.query('UPDATE reports SET status = $1 WHERE id = $2', [status, req.params.id]);
+    res.json({ message: 'Report status updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update report' });
   }
 });
 

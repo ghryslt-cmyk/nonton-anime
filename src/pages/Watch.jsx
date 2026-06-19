@@ -1,7 +1,7 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom'
-import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart, Share2, Send } from 'lucide-react'
+import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart, Share2, Send, Flag } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import { animeAPI, authAPI } from '../services/api'
+import { animeAPI, authAPI, reportsAPI } from '../services/api'
 
 // Helper function to extract YouTube video ID
 const getYouTubeId = (url) => {
@@ -39,6 +39,11 @@ export default function Watch() {
   const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
   const [submittingComment, setSubmittingComment] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [reportForm, setReportForm] = useState({
+    report_type: 'broken_link',
+    description: ''
+  })
 
   useEffect(() => {
     loadAnime()
@@ -123,6 +128,30 @@ export default function Watch() {
       alert('Failed to add comment')
     } finally {
       setSubmittingComment(false)
+    }
+  }
+
+  const handleSubmitReport = async (e) => {
+    e.preventDefault()
+    const user = authAPI.getCurrentUser()
+    if (!user) {
+      alert('Please login to submit a report')
+      return
+    }
+
+    try {
+      await reportsAPI.submit({
+        anime_id: parseInt(id),
+        episode_id: currentEpisode?.id || null,
+        report_type: reportForm.report_type,
+        description: reportForm.description
+      })
+      alert('Report submitted successfully!')
+      setShowReportModal(false)
+      setReportForm({ report_type: 'broken_link', description: '' })
+    } catch (err) {
+      alert('Failed to submit report')
+      console.error('Error:', err)
     }
   }
 
@@ -298,6 +327,13 @@ export default function Watch() {
                 <Share2 className="w-5 h-5" />
                 Share
               </button>
+              <button 
+                onClick={() => setShowReportModal(true)}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition"
+              >
+                <Flag className="w-5 h-5" />
+                Report
+              </button>
             </div>
 
             {/* Episode List */}
@@ -406,6 +442,55 @@ export default function Watch() {
           </div>
         </div>
       </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Report Issue</h2>
+            <form onSubmit={handleSubmitReport}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Report Type</label>
+                <select
+                  value={reportForm.report_type}
+                  onChange={(e) => setReportForm({ ...reportForm, report_type: e.target.value })}
+                  className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="broken_link">Broken Link</option>
+                  <option value="wrong_episode">Wrong Episode</option>
+                  <option value="poor_quality">Poor Quality</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Description (Optional)</label>
+                <textarea
+                  value={reportForm.description}
+                  onChange={(e) => setReportForm({ ...reportForm, description: e.target.value })}
+                  placeholder="Describe the issue..."
+                  className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                  rows="3"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition"
+                >
+                  Submit Report
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

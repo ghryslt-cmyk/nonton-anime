@@ -217,3 +217,24 @@ export const settingsAPI = {
     });
   },
 };
+
+// Reports API
+export const reportsAPI = {
+  submit: async (data) => {
+    return apiCall('/reports', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  getAll: async () => {
+    return apiCall('/reports');
+  },
+
+  updateStatus: async (id, status) => {
+    return apiCall(`/reports/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  },
+};
