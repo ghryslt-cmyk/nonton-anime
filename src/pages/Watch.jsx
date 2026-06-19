@@ -40,6 +40,7 @@ export default function Watch() {
   const [newComment, setNewComment] = useState('')
   const [submittingComment, setSubmittingComment] = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [reportForm, setReportForm] = useState({
     report_type: 'broken_link',
     description: ''
@@ -323,7 +324,10 @@ export default function Watch() {
                 <Heart className="w-5 h-5" />
                 Add to Favorites
               </button>
-              <button className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-lg transition">
+              <button 
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-lg transition"
+              >
                 <Share2 className="w-5 h-5" />
                 Share
               </button>
@@ -488,6 +492,75 @@ export default function Watch() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Share {anime?.title}</h2>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <a
+                href={`https://twitter.com/intent/tweet?text=Check out ${anime?.title} on WorldEnd Stream!&url=${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 px-4 py-3 rounded-lg transition"
+              >
+                Twitter
+              </a>
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 px-4 py-3 rounded-lg transition"
+              >
+                Facebook
+              </a>
+              <a
+                href={`https://wa.me/?text=Check out ${anime?.title} on WorldEnd Stream! ${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-3 rounded-lg transition"
+              >
+                WhatsApp
+              </a>
+              <a
+                href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=Check out ${anime?.title} on WorldEnd Stream!`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-blue-400 hover:bg-blue-500 px-4 py-3 rounded-lg transition"
+              >
+                Telegram
+              </a>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Copy Link</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={window.location.href}
+                  readOnly
+                  className="flex-1 bg-slate-700 text-white px-4 py-2 rounded-lg focus:outline-none"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href)
+                    alert('Link copied to clipboard!')
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowShareModal(false)}
+              className="w-full bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
