@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Feather, Upload, Film, Users, Settings, LogOut, Plus, Edit, Trash2 } from 'lucide-react'
+import { Feather, Upload, Film, Users, Settings, LogOut, Plus, Edit, Trash2, Flag, Check, X as XIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { animeAPI, userAPI, settingsAPI, authAPI } from '../services/api'
+import { animeAPI, userAPI, settingsAPI, authAPI, reportsAPI } from '../services/api'
 
 const BACKEND_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin
 
@@ -30,6 +30,7 @@ export default function Admin() {
   const [animeList, setAnimeList] = useState([])
   const [users, setUsers] = useState([])
   const [settings, setSettings] = useState({ admin_email_domain: '@worldend.com', max_video_size_mb: '2048' })
+  const [reports, setReports] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -42,6 +43,7 @@ export default function Admin() {
     loadAnimeList()
     loadUsers()
     loadSettings()
+    loadReports()
   }, [navigate])
 
   const loadAnimeList = async () => {
@@ -68,6 +70,15 @@ export default function Admin() {
       setSettings(data)
     } catch (err) {
       console.error('Failed to load settings:', err)
+    }
+  }
+
+  const loadReports = async () => {
+    try {
+      const data = await reportsAPI.getAll()
+      setReports(data)
+    } catch (err) {
+      console.error('Failed to load reports:', err)
     }
   }
 
@@ -217,6 +228,17 @@ export default function Admin() {
     }
   }
 
+  const handleUpdateReportStatus = async (reportId, status) => {
+    try {
+      await reportsAPI.updateStatus(reportId, status)
+      alert(`Report ${status} successfully!`)
+      loadReports()
+    } catch (err) {
+      alert('Failed to update report status')
+      console.error('Error:', err)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
@@ -259,6 +281,15 @@ export default function Admin() {
               >
                 <Users className="w-4 h-4 md:w-5 h-5" />
                 Manage Users
+              </button>
+              <button
+                onClick={() => setActiveTab('reports')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm md:text-base ${
+                  activeTab === 'reports' ? 'bg-purple-600' : 'hover:bg-slate-700'
+                }`}
+              >
+                <Flag className="w-4 h-4 md:w-5 h-5" />
+                Reports
               </button>
               <button
                 onClick={() => setActiveTab('settings')}
@@ -647,6 +678,73 @@ export default function Admin() {
                   <button onClick={handleSettingsUpdate} className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition text-sm">
                     Save Settings
                   </button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'reports' && (
+              <div className="bg-slate-800 rounded-lg p-6 md:p-8">
+                <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Flag className="w-5 h-5 md:w-6 h-6" />
+                  Reports
+                </h2>
+                <div className="space-y-4">
+                  {reports.length > 0 ? (
+                    reports.map((report) => (
+                      <div key={report.id} className="bg-slate-700 rounded-lg p-4">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                report.status === 'pending' ? 'bg-yellow-600' :
+                                report.status === 'resolved' ? 'bg-green-600' :
+                                'bg-gray-600'
+                              }`}>
+                                {report.status}
+                              </span>
+                              <span className="text-sm text-gray-400">
+                                {new Date(report.created_at).toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="font-semibold mb-1">
+                              {report.report_type.replace('_', ' ').toUpperCase()}
+                            </p>
+                            <p className="text-sm text-gray-300 mb-2">
+                              {report.anime_title} {report.episode_number && `- Episode ${report.episode_number}`}
+                            </p>
+                            {report.description && (
+                              <p className="text-sm text-gray-400">{report.description}</p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              Reported by: {report.username || 'Unknown'}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            {report.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleUpdateReportStatus(report.id, 'resolved')}
+                                  className="flex items-center gap-1 bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-sm"
+                                >
+                                  <Check className="w-4 h-4" />
+                                  Resolve
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateReportStatus(report.id, 'dismissed')}
+                                  className="flex items-center gap-1 bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded-lg transition text-sm"
+                                >
+                                  <XIcon className="w-4 h-4" />
+                                  Dismiss
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">No reports yet</p>
+                  )}
                 </div>
               </div>
             )}
