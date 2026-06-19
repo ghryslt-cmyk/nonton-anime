@@ -13,7 +13,8 @@ export default function Admin() {
     episode_number: '',
     title: '',
     video_url: '',
-    video_platform: 'youtube'
+    video_platform: 'youtube',
+    release_date: ''
   })
   const [animeData, setAnimeData] = useState({
     title: '',
@@ -172,7 +173,8 @@ export default function Admin() {
         episode_number: parseInt(episodeForm.episode_number),
         title: episodeForm.title,
         video_url: episodeForm.video_url,
-        video_platform: episodeForm.video_platform
+        video_platform: episodeForm.video_platform,
+        release_date: episodeForm.release_date || null
       }
       await animeAPI.createEpisode(animeId, data)
       alert('Episode added successfully!')
@@ -180,7 +182,8 @@ export default function Admin() {
         episode_number: '',
         title: '',
         video_url: '',
-        video_platform: 'youtube'
+        video_platform: 'youtube',
+        release_date: ''
       })
       // Reload episodes for selected anime
       if (selectedAnime && selectedAnime.id === animeId) {
@@ -519,6 +522,15 @@ export default function Admin() {
                             value={episodeForm.video_url}
                             onChange={(e) => setEpisodeForm({ ...episodeForm, video_url: e.target.value })}
                             placeholder="https://youtube.com/watch?v=..."
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs md:text-sm font-medium mb-2">Release Date (Optional)</label>
+                          <input
+                            type="date"
+                            value={episodeForm.release_date}
+                            onChange={(e) => setEpisodeForm({ ...episodeForm, release_date: e.target.value })}
                             className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                           />
                         </div>

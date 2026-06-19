@@ -204,9 +204,14 @@ export default function AnimeDetail() {
                     <Link
                       key={episode.id}
                       to={`/watch/${anime.id}?episode=${episode.id}`}
-                      className="bg-slate-800 hover:bg-purple-600 p-3 rounded-lg text-center transition"
+                      className="bg-slate-800 hover:bg-purple-600 p-3 rounded-lg text-center transition group"
                     >
-                      {episode.episode_number}
+                      <div className="font-semibold">{episode.episode_number}</div>
+                      {episode.release_date && (
+                        <div className="text-xs text-gray-400 group-hover:text-white mt-1">
+                          {new Date(episode.release_date).toLocaleDateString()}
+                        </div>
+                      )}
                     </Link>
                   ))
                 ) : (
