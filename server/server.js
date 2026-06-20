@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const cron = require('node-cron');
 const Joi = require('joi');
 const validator = require('validator');
 
@@ -953,6 +954,74 @@ app.put('/api/settings', authenticateToken, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to update settings' });
   }
 });
+
+// Automatic Schedule Update System
+const getNextDayOfWeek = (dayName) => {
+  const days = {
+    'Senin': 1,
+    'Selasa': 2,
+    'Rabu': 3,
+    'Kamis': 4,
+    'Jumat': 5,
+    'Sabtu': 6,
+    'Minggu': 0
+  };
+  const targetDay = days[dayName];
+  const today = new Date();
+  const currentDay = today.getDay();
+  const daysUntilTarget = (targetDay - currentDay + 7) % 7;
+  
+  if (daysUntilTarget === 0) {
+    // If today is the target day, return next week's target day
+    return new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  }
+  
+  return new Date(today.getTime() + daysUntilTarget * 24 * 60 * 60 * 1000);
+};
+
+const updateAnimeSchedules = async () => {
+  try {
+    console.log('Running automatic schedule update...');
+    
+    // Get all ongoing anime
+    const result = await pool.query(`
+      SELECT id, title, release_day, next_episode_date, next_episode_number 
+      FROM anime 
+      WHERE status = 'Ongoing' 
+      AND release_day IS NOT NULL
+    `);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (const anime of result.rows) {
+      if (!anime.next_episode_date) continue;
+      
+      const nextEpisodeDate = new Date(anime.next_episode_date);
+      nextEpisodeDate.setHours(0, 0, 0, 0);
+      
+      // If the next episode date has passed, update to the next occurrence
+      if (nextEpisodeDate <= today) {
+        const newNextDate = getNextDayOfWeek(anime.release_day);
+        const newEpisodeNumber = (anime.next_episode_number || 0) + 1;
+        
+        await pool.query(
+          `UPDATE anime SET next_episode_date = $1, next_episode_number = $2 WHERE id = $3`,
+          [newNextDate.toISOString().split('T')[0], newEpisodeNumber, anime.id]
+        );
+        
+        console.log(`Updated schedule for ${anime.title}: Next episode ${newEpisodeNumber} on ${newNextDate.toISOString().split('T')[0]}`);
+      }
+    }
+    
+    console.log('Automatic schedule update completed');
+  } catch (error) {
+    console.error('Error updating schedules:', error);
+  }
+};
+
+// Run schedule update every day at midnight
+cron.schedule('0 0 * * *', updateAnimeSchedules);
 
 // Start server
 app.listen(PORT, () => {
