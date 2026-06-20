@@ -1,5 +1,5 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom'
-import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart, Share2, Send, Flag } from 'lucide-react'
+import { Play, Pause, Volume2, Maximize, Settings, ArrowLeft, SkipBack, SkipForward, Heart, Share2, Send, Flag, SkipForwardIcon, Rewind, FastForward, Monitor, Globe } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { animeAPI, authAPI, reportsAPI } from '../services/api'
 
@@ -42,6 +42,9 @@ export default function Watch() {
   const [showReportModal, setShowReportModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [selectedQuality, setSelectedQuality] = useState('default')
+  const [selectedServer, setSelectedServer] = useState('indonesia') // indonesia or english
+  const [isLiked, setIsLiked] = useState(false)
+  const [showEpisodeList, setShowEpisodeList] = useState(false)
   const [reportForm, setReportForm] = useState({
     report_type: 'broken_link',
     description: ''
@@ -178,6 +181,64 @@ export default function Watch() {
     if (videoRef.current) {
       setDuration(videoRef.current.duration)
     }
+  }
+
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause()
+      } else {
+        videoRef.current.play()
+      }
+    }
+  }
+
+  const handleSkipForward = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = Math.min(videoRef.current.currentTime + 10, duration)
+    }
+  }
+
+  const handleSkipBackward = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = Math.max(videoRef.current.currentTime - 10, 0)
+    }
+  }
+
+  const handleNextEpisode = () => {
+    const currentIndex = episodes.findIndex(e => e.id === currentEpisode?.id)
+    if (currentIndex < episodes.length - 1) {
+      const nextEpisode = episodes[currentIndex + 1]
+      setCurrentEpisode(nextEpisode)
+      window.history.pushState({}, '', `/watch/${id}?episode=${nextEpisode.id}`)
+      loadComments()
+    }
+  }
+
+  const handleFullscreen = () => {
+    if (videoRef.current) {
+      if (videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen()
+      } else if (videoRef.current.webkitRequestFullscreen) {
+        videoRef.current.webkitRequestFullscreen()
+      } else if (videoRef.current.msRequestFullscreen) {
+        videoRef.current.msRequestFullscreen()
+      }
+    }
+  }
+
+  const handleLike = () => {
+    setIsLiked(!isLiked)
+    // Save like status to localStorage
+    const likeKey = `like_${id}_${currentEpisode?.id || 1}`
+    localStorage.setItem(likeKey, JSON.stringify(!isLiked))
+  }
+
+  const handleServerChange = (server) => {
+    setSelectedServer(server)
+    // In a real implementation, this would switch to a different video server
+    // For now, we'll just update the state
+    console.log('Server changed to:', server)
   }
 
   const handleSeek = (e) => {
@@ -327,30 +388,37 @@ export default function Watch() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={handlePlayPause}
                   className="p-2 hover:bg-white/10 rounded-full transition"
                 >
                   {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                 </button>
-                <button className="p-2 hover:bg-white/10 rounded-full transition">
-                  <SkipBack className="w-6 h-6" />
-                </button>
-                <button className="p-2 hover:bg-white/10 rounded-full transition">
-                  <SkipForward className="w-6 h-6" />
+                <button
+                  onClick={handleSkipBackward}
+                  className="p-2 hover:bg-white/10 rounded-full transition"
+                  title="Skip back 10 seconds"
+                >
+                  <Rewind className="w-6 h-6" />
                 </button>
                 <button
-                  onClick={() => setIsMuted(!isMuted)}
+                  onClick={handleSkipForward}
                   className="p-2 hover:bg-white/10 rounded-full transition"
+                  title="Skip forward 10 seconds"
                 >
-                  <Volume2 className="w-6 h-6" />
+                  <FastForward className="w-6 h-6" />
                 </button>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <button className="p-2 hover:bg-white/10 rounded-full transition">
-                  <Settings className="w-6 h-6" />
+                <button
+                  onClick={handleNextEpisode}
+                  className="p-2 hover:bg-white/10 rounded-full transition"
+                  title="Next episode"
+                >
+                  <SkipForwardIcon className="w-6 h-6" />
                 </button>
-                <button className="p-2 hover:bg-white/10 rounded-full transition">
+                <button
+                  onClick={handleFullscreen}
+                  className="p-2 hover:bg-white/10 rounded-full transition"
+                  title="Fullscreen"
+                >
                   <Maximize className="w-6 h-6" />
                 </button>
               </div>
@@ -370,12 +438,42 @@ export default function Watch() {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <h1 className="text-3xl font-bold mb-2">{anime.title}</h1>
-            <p className="text-gray-400 mb-6">Episode 1 - {anime.description}</p>
+            <p className="text-gray-400 mb-6">Episode {currentEpisode?.episode_number || 1} - {currentEpisode?.title || anime.description}</p>
+
+            {/* Server Selector */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Server</h3>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleServerChange('indonesia')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                    selectedServer === 'indonesia' ? 'bg-purple-600' : 'bg-slate-800 hover:bg-slate-700'
+                  }`}
+                >
+                  <Globe className="w-4 h-4" />
+                  Indonesia
+                </button>
+                <button
+                  onClick={() => handleServerChange('english')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                    selectedServer === 'english' ? 'bg-purple-600' : 'bg-slate-800 hover:bg-slate-700'
+                  }`}
+                >
+                  <Globe className="w-4 h-4" />
+                  English
+                </button>
+              </div>
+            </div>
 
             <div className="flex gap-4 mb-8">
-              <button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition">
-                <Heart className="w-5 h-5" />
-                Add to Favorites
+              <button
+                onClick={handleLike}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg transition ${
+                  isLiked ? 'bg-red-600 hover:bg-red-700' : 'bg-slate-800 hover:bg-slate-700'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                {isLiked ? 'Liked' : 'Like'}
               </button>
               <button 
                 onClick={() => setShowShareModal(true)}
