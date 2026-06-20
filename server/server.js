@@ -24,6 +24,11 @@ const EXTERNAL_VIDEO_SERVER = process.env.EXTERNAL_VIDEO_SERVER || 'https://vide
 const VIDEO_SERVER_INDONESIA = process.env.VIDEO_SERVER_INDONESIA || 'https://video-indo.example.com';
 const VIDEO_SERVER_ENGLISH = process.env.VIDEO_SERVER_ENGLISH || 'https://video-eng.example.com';
 
+// External storage configuration (for Railway 500MB limit)
+const EXTERNAL_STORAGE_ENABLED = process.env.EXTERNAL_STORAGE_ENABLED === 'true';
+const EXTERNAL_STORAGE_URL = process.env.EXTERNAL_STORAGE_URL || 'https://storage.example.com';
+const EXTERNAL_STORAGE_API_KEY = process.env.EXTERNAL_STORAGE_API_KEY || '';
+
 // MyAnimeList API configuration
 const MAL_API_URL = process.env.MAL_API_URL || 'https://api.myanimelist.net/v2';
 const MAL_CLIENT_ID = process.env.MAL_CLIENT_ID || '';
@@ -126,51 +131,69 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
-console.log('Uploads directory:', uploadsDir);
-console.log('RAILWAY_VOLUME_MOUNT_PATH:', process.env.RAILWAY_VOLUME_MOUNT_PATH);
+// Create uploads directory if it doesn't exist (only if external storage is disabled)
+if (!EXTERNAL_STORAGE_ENABLED) {
+  const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
+  console.log('Uploads directory:', uploadsDir);
+  console.log('RAILWAY_VOLUME_MOUNT_PATH:', process.env.RAILWAY_VOLUME_MOUNT_PATH);
 
-if (!fs.existsSync(uploadsDir)) {
-  console.log('Creating uploads directory:', uploadsDir);
-  fs.mkdirSync(uploadsDir, { recursive: true });
-  fs.mkdirSync(path.join(uploadsDir, 'images'), { recursive: true });
-  fs.mkdirSync(path.join(uploadsDir, 'videos'), { recursive: true });
-  fs.mkdirSync(path.join(uploadsDir, 'profiles'), { recursive: true });
+  if (!fs.existsSync(uploadsDir)) {
+    console.log('Creating uploads directory:', uploadsDir);
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    fs.mkdirSync(path.join(uploadsDir, 'images'), { recursive: true });
+    fs.mkdirSync(path.join(uploadsDir, 'videos'), { recursive: true });
+    fs.mkdirSync(path.join(uploadsDir, 'profiles'), { recursive: true });
+  } else {
+    console.log('Uploads directory exists:', uploadsDir);
+    // Ensure subdirectories exist
+    const subdirs = ['images', 'videos', 'profiles'];
+    subdirs.forEach(subdir => {
+      const subdirPath = path.join(uploadsDir, subdir);
+      if (!fs.existsSync(subdirPath)) {
+        console.log('Creating subdirectory:', subdirPath);
+        fs.mkdirSync(subdirPath, { recursive: true });
+      }
+    });
+  }
 } else {
-  console.log('Uploads directory exists:', uploadsDir);
-  // Ensure subdirectories exist
-  const subdirs = ['images', 'videos', 'profiles'];
-  subdirs.forEach(subdir => {
-    const subdirPath = path.join(uploadsDir, subdir);
-    if (!fs.existsSync(subdirPath)) {
-      console.log('Creating subdirectory:', subdirPath);
-      fs.mkdirSync(subdirPath, { recursive: true });
-    }
-  });
+  console.log('External storage enabled - skipping local directory creation');
 }
 
-// Serve static files with proper headers
-app.use('/uploads', (req, res, next) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.set('Access-Control-Allow-Credentials', 'true');
-  res.set('Cache-Control', 'public, max-age=3600');
-  res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-  next();
-}, express.static(uploadsDir));
+// Serve static files with proper headers (only if external storage is disabled)
+if (!EXTERNAL_STORAGE_ENABLED) {
+  const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
+  app.use('/uploads', (req, res, next) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  }, express.static(uploadsDir));
+} else {
+  console.log('External storage enabled - static file serving disabled');
+}
 
 // Multer configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
-    if (file.fieldname === 'image') {
-      cb(null, path.join(uploadsDir, 'images'));
-    } else if (file.fieldname === 'video') {
-      cb(null, path.join(uploadsDir, 'videos'));
-    } else if (file.fieldname === 'profile_photo') {
-      cb(null, path.join(uploadsDir, 'profiles'));
+    if (EXTERNAL_STORAGE_ENABLED) {
+      // When external storage is enabled, use a temporary directory
+      const tempDir = path.join(__dirname, 'temp');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      cb(null, tempDir);
+    } else {
+      const uploadsDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
+      if (file.fieldname === 'image') {
+        cb(null, path.join(uploadsDir, 'images'));
+      } else if (file.fieldname === 'video') {
+        cb(null, path.join(uploadsDir, 'videos'));
+      } else if (file.fieldname === 'profile_photo') {
+        cb(null, path.join(uploadsDir, 'profiles'));
+      }
     }
   },
   filename: function (req, file, cb) {
