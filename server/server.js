@@ -1030,7 +1030,7 @@ const updateAnimeSchedules = async () => {
 };
 
 // Run schedule update every day at midnight
-cron.schedule('0 0 * * *', updateAnimeSchedules);
+// cron.schedule('0 0 * * *', updateAnimeSchedules);
 
 // Automatic Episode Release System
 const publishScheduledEpisodes = async () => {
@@ -1067,10 +1067,34 @@ const publishScheduledEpisodes = async () => {
 };
 
 // Run episode publish check every minute
-cron.schedule('* * * * *', publishScheduledEpisodes);
+// cron.schedule('* * * * *', publishScheduledEpisodes);
+
+// Initialize cron jobs after database is ready
+const initializeCronJobs = async () => {
+  try {
+    // Wait a bit to ensure database is fully initialized
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
+    console.log('Initializing cron jobs...');
+    
+    // Schedule update every day at midnight
+    cron.schedule('0 0 * * *', updateAnimeSchedules);
+    console.log('Schedule update cron job initialized');
+    
+    // Episode publish check every minute
+    cron.schedule('* * * * *', publishScheduledEpisodes);
+    console.log('Episode publish cron job initialized');
+    
+  } catch (error) {
+    console.error('Error initializing cron jobs:', error);
+  }
+};
 
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log('Connected to PostgreSQL database');
+  
+  // Initialize cron jobs after server starts
+  initializeCronJobs();
 });
