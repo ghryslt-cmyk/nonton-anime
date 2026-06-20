@@ -237,4 +237,11 @@ export const reportsAPI = {
       body: JSON.stringify({ status }),
     });
   },
+
+  updateSchedule: async (animeId, scheduleData) => {
+    return apiCall(`/anime/${animeId}/schedule`, {
+      method: 'PATCH',
+      body: JSON.stringify(scheduleData),
+    });
+  },
 };

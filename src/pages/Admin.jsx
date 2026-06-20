@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Feather, Upload, Film, Users, Settings, LogOut, Plus, Edit, Trash2, Flag, Check, X as XIcon } from 'lucide-react'
+import { Feather, Upload, Film, Users, Settings, LogOut, Plus, Edit, Trash2, Flag, Check, X as XIcon, Calendar } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { animeAPI, userAPI, settingsAPI, authAPI, reportsAPI } from '../services/api'
 
@@ -29,7 +29,10 @@ export default function Admin() {
     status: 'Ongoing',
     image: null,
     video_url: '',
-    video_platform: 'youtube'
+    video_platform: 'youtube',
+    release_day: '',
+    next_episode_date: '',
+    next_episode_number: ''
   })
   const [animeList, setAnimeList] = useState([])
   const [users, setUsers] = useState([])
@@ -251,6 +254,17 @@ export default function Admin() {
     }
   }
 
+  const handleUpdateSchedule = async (animeId, scheduleData) => {
+    try {
+      await reportsAPI.updateSchedule(animeId, scheduleData)
+      alert('Schedule updated successfully!')
+      loadAnimeList()
+    } catch (err) {
+      alert('Failed to update schedule')
+      console.error('Error:', err)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
@@ -302,6 +316,15 @@ export default function Admin() {
               >
                 <Flag className="w-4 h-4 md:w-5 h-5" />
                 Reports
+              </button>
+              <button
+                onClick={() => setActiveTab('schedule')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm md:text-base ${
+                  activeTab === 'schedule' ? 'bg-purple-600' : 'hover:bg-slate-700'
+                }`}
+              >
+                <Calendar className="w-4 h-4 md:w-5 h-5" />
+                Jadwal Rilis
               </button>
               <button
                 onClick={() => setActiveTab('settings')}
@@ -401,8 +424,55 @@ export default function Admin() {
                     >
                       <option value="Ongoing">Ongoing</option>
                       <option value="Completed">Completed</option>
+                      <option value="Upcoming">Upcoming</option>
                     </select>
                   </div>
+
+                  {animeData.status === 'Ongoing' && (
+                    <>
+                      <div>
+                        <label className="block text-xs md:text-sm font-medium mb-2">Hari Rilis</label>
+                        <select
+                          name="release_day"
+                          value={animeData.release_day}
+                          onChange={handleInputChange}
+                          className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                        >
+                          <option value="">Pilih Hari</option>
+                          <option value="Senin">Senin</option>
+                          <option value="Selasa">Selasa</option>
+                          <option value="Rabu">Rabu</option>
+                          <option value="Kamis">Kamis</option>
+                          <option value="Jumat">Jumat</option>
+                          <option value="Sabtu">Sabtu</option>
+                          <option value="Minggu">Minggu</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs md:text-sm font-medium mb-2">Tanggal Episode Berikutnya</label>
+                        <input
+                          type="date"
+                          name="next_episode_date"
+                          value={animeData.next_episode_date}
+                          onChange={handleInputChange}
+                          className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs md:text-sm font-medium mb-2">Nomor Episode Berikutnya</label>
+                        <input
+                          type="number"
+                          name="next_episode_number"
+                          value={animeData.next_episode_number}
+                          onChange={handleInputChange}
+                          placeholder="Contoh: 1"
+                          className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <div>
                     <label className="block text-xs md:text-sm font-medium mb-2">Cover Image</label>
@@ -696,6 +766,61 @@ export default function Admin() {
                   ))}
                   {users.length === 0 && (
                     <p className="text-gray-400 text-center py-8 text-sm">No users registered yet</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'schedule' && (
+              <div className="bg-slate-800 rounded-lg p-6 md:p-8">
+                <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 md:w-6 h-6" />
+                  Jadwal Rilis Anime
+                </h2>
+                <div className="space-y-4">
+                  {animeList.filter(anime => anime.status === 'Ongoing').length > 0 ? (
+                    animeList.filter(anime => anime.status === 'Ongoing').map((anime) => (
+                      <div key={anime.id} className="bg-slate-700 rounded-lg p-4">
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg mb-2">{anime.title}</h3>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-400">Hari Rilis:</p>
+                                <p className="font-medium">{anime.release_day || 'Belum diatur'}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400">Episode Berikutnya:</p>
+                                <p className="font-medium">{anime.next_episode_number || 'Belum diatur'}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400">Tanggal Rilis:</p>
+                                <p className="font-medium">{anime.next_episode_date ? new Date(anime.next_episode_date).toLocaleDateString('id-ID') : 'Belum diatur'}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const newReleaseDay = prompt('Masukkan hari rilis (Senin-Minggu):', anime.release_day || '')
+                              const newNextEpisodeDate = prompt('Masukkan tanggal episode berikutnya (YYYY-MM-DD):', anime.next_episode_date || '')
+                              const newNextEpisodeNumber = prompt('Masukkan nomor episode berikutnya:', anime.next_episode_number || '')
+                              if (newReleaseDay || newNextEpisodeDate || newNextEpisodeNumber) {
+                                handleUpdateSchedule(anime.id, {
+                                  release_day: newReleaseDay || anime.release_day,
+                                  next_episode_date: newNextEpisodeDate || anime.next_episode_date,
+                                  next_episode_number: newNextEpisodeNumber ? parseInt(newNextEpisodeNumber) : anime.next_episode_number
+                                })
+                              }
+                            }}
+                            className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition text-sm"
+                          >
+                            Update Jadwal
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">Tidak ada anime ongoing</p>
                   )}
                 </div>
               </div>
