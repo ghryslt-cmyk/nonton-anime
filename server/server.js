@@ -55,6 +55,14 @@ app.use(helmet({
     },
   },
   crossOriginEmbedderPolicy: false,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  noSniff: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  xssFilter: true,
 }));
 
 // Rate limiting
@@ -75,6 +83,19 @@ const authLimiter = rateLimit({
 });
 
 app.use(limiter);
+
+// Additional DDoS protection
+app.use((req, res, next) => {
+  // Block requests with suspicious user agents
+  const suspiciousUserAgents = ['bot', 'crawler', 'spider', 'scraper', 'curl', 'wget'];
+  const userAgent = req.headers['user-agent'] || '';
+  
+  if (suspiciousUserAgents.some(agent => userAgent.toLowerCase().includes(agent))) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  
+  next();
+});
 
 // CORS configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
