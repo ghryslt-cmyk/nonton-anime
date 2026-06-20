@@ -18,7 +18,9 @@ export default function Admin() {
     video_url_720p: '',
     video_url_1080p: '',
     video_platform: 'youtube',
-    release_date: ''
+    release_date: '',
+    scheduled_release: '',
+    is_published: true
   })
   const [animeData, setAnimeData] = useState({
     title: '',
@@ -196,7 +198,9 @@ export default function Admin() {
         video_url_720p: episodeForm.video_url_720p,
         video_url_1080p: episodeForm.video_url_1080p,
         video_platform: episodeForm.video_platform,
-        release_date: episodeForm.release_date || null
+        release_date: episodeForm.release_date || null,
+        scheduled_release: episodeForm.scheduled_release || null,
+        is_published: episodeForm.is_published
       }
       await animeAPI.createEpisode(animeId, data)
       alert('Episode added successfully!')
@@ -209,7 +213,9 @@ export default function Admin() {
         video_url_720p: '',
         video_url_1080p: '',
         video_platform: 'youtube',
-        release_date: ''
+        release_date: '',
+        scheduled_release: '',
+        is_published: true
       })
       // Reload episodes for selected anime
       if (selectedAnime && selectedAnime.id === animeId) {
@@ -686,6 +692,29 @@ export default function Admin() {
                             onChange={(e) => setEpisodeForm({ ...episodeForm, release_date: e.target.value })}
                             className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                           />
+                        </div>
+                        <div>
+                          <label className="block text-xs md:text-sm font-medium mb-2">Scheduled Release Time (Optional)</label>
+                          <input
+                            type="datetime-local"
+                            value={episodeForm.scheduled_release}
+                            onChange={(e) => setEpisodeForm({ ...episodeForm, scheduled_release: e.target.value })}
+                            className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                          />
+                          <p className="text-xs text-gray-400 mt-1">Set a future time to auto-publish this episode</p>
+                        </div>
+                        <div>
+                          <label className="block text-xs md:text-sm font-medium mb-2">Publish Immediately</label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id="is_published"
+                              checked={episodeForm.is_published}
+                              onChange={(e) => setEpisodeForm({ ...episodeForm, is_published: e.target.checked })}
+                              className="w-4 h-4 bg-slate-600 rounded"
+                            />
+                            <label htmlFor="is_published" className="text-sm text-gray-300">Yes, publish immediately</label>
+                          </div>
                         </div>
                       </div>
                       <button

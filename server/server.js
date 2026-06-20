@@ -251,6 +251,8 @@ async function initializeDatabase() {
         video_platform TEXT DEFAULT 'file',
         duration INTEGER,
         release_date DATE,
+        scheduled_release TIMESTAMP,
+        is_published BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE
       )
@@ -395,7 +397,9 @@ const episodeSchema = Joi.object({
   video_url_1080p: Joi.string().uri().allow(''),
   video_platform: Joi.string().valid('file', 'youtube', 'vimeo', 'other').default('file'),
   duration: Joi.number().integer().min(1).max(14400).allow(''),
-  release_date: Joi.date().allow('')
+  release_date: Joi.date().allow(''),
+  scheduled_release: Joi.date().allow(''),
+  is_published: Joi.boolean().default(false)
 });
 
 const reviewSchema = Joi.object({
@@ -676,7 +680,12 @@ app.delete('/api/anime/:id', authenticateToken, requireAdmin, async (req, res) =
 // Episodes Routes
 app.get('/api/anime/:id/episodes', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM episodes WHERE anime_id = $1 ORDER BY episode_number', [req.params.id]);
+    const user = req.user;
+    // Only show published episodes for non-admin users
+    const query = user && user.role === 'admin' 
+      ? 'SELECT * FROM episodes WHERE anime_id = $1 ORDER BY episode_number'
+      : 'SELECT * FROM episodes WHERE anime_id = $1 AND is_published = true ORDER BY episode_number';
+    const result = await pool.query(query, [req.params.id]);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
@@ -691,17 +700,17 @@ app.post('/api/anime/:id/episodes', authenticateToken, requireAdmin, async (req,
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, duration, release_date } = value;
+    const { episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, duration, release_date, scheduled_release, is_published } = value;
 
     const result = await pool.query(
-      `INSERT INTO episodes (anime_id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, duration, release_date)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
-      [req.params.id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform || 'other', duration || 1440, release_date || null]
+      `INSERT INTO episodes (anime_id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, duration, release_date, scheduled_release, is_published)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
+      [req.params.id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform || 'other', duration || 1440, release_date || null, scheduled_release || null, is_published || false]
     );
 
     res.json({
       message: 'Episode created successfully',
-      episode: { id: result.rows[0].id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, release_date }
+      episode: { id: result.rows[0].id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, release_date, scheduled_release, is_published }
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -1022,6 +1031,43 @@ const updateAnimeSchedules = async () => {
 
 // Run schedule update every day at midnight
 cron.schedule('0 0 * * *', updateAnimeSchedules);
+
+// Automatic Episode Release System
+const publishScheduledEpisodes = async () => {
+  try {
+    console.log('Checking for scheduled episodes to publish...');
+    
+    const now = new Date();
+    
+    // Find all scheduled episodes that should be published
+    const result = await pool.query(`
+      SELECT e.*, a.title as anime_title 
+      FROM episodes e
+      JOIN anime a ON e.anime_id = a.id
+      WHERE e.is_published = false 
+      AND e.scheduled_release IS NOT NULL
+      AND e.scheduled_release <= $1
+    `, [now]);
+    
+    for (const episode of result.rows) {
+      await pool.query(
+        'UPDATE episodes SET is_published = true WHERE id = $1',
+        [episode.id]
+      );
+      
+      console.log(`Published episode ${episode.episode_number} of ${episode.anime_title}`);
+    }
+    
+    if (result.rows.length > 0) {
+      console.log(`Published ${result.rows.length} scheduled episodes`);
+    }
+  } catch (error) {
+    console.error('Error publishing scheduled episodes:', error);
+  }
+};
+
+// Run episode publish check every minute
+cron.schedule('* * * * *', publishScheduledEpisodes);
 
 // Start server
 app.listen(PORT, () => {
