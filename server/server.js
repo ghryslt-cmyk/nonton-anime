@@ -1078,12 +1078,12 @@ const initializeCronJobs = async () => {
     console.log('Initializing cron jobs...');
     
     // Schedule update every day at midnight
-    cron.schedule('0 0 * * *', updateAnimeSchedules);
-    console.log('Schedule update cron job initialized');
+    // cron.schedule('0 0 * * *', updateAnimeSchedules);
+    console.log('Schedule update cron job disabled for now');
     
     // Episode publish check every minute
-    cron.schedule('* * * * *', publishScheduledEpisodes);
-    console.log('Episode publish cron job initialized');
+    // cron.schedule('* * * * *', publishScheduledEpisodes);
+    console.log('Episode publish cron job disabled for now');
     
   } catch (error) {
     console.error('Error initializing cron jobs:', error);
