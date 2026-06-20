@@ -244,4 +244,16 @@ export const reportsAPI = {
       body: JSON.stringify(scheduleData),
     });
   },
+
+  getExternalVideo: async (animeId, episodeId, server = 'indonesia') => {
+    return apiCall(`/external-video/${animeId}/${episodeId}?server=${server}`);
+  },
+
+  getMALAnime: async (malId) => {
+    return apiCall(`/mal/anime/${malId}`);
+  },
+
+  searchMAL: async (query, limit = 10) => {
+    return apiCall(`/mal/search/${query}?limit=${limit}`);
+  },
 };

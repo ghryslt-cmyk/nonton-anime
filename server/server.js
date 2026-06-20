@@ -19,6 +19,15 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 const JWT_SECRET = process.env.JWT_SECRET || (isDevelopment ? 'worldend-dev-secret-key-2024-change-in-production' : null);
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/worldend';
 
+// External video server configuration
+const EXTERNAL_VIDEO_SERVER = process.env.EXTERNAL_VIDEO_SERVER || 'https://video.example.com';
+const VIDEO_SERVER_INDONESIA = process.env.VIDEO_SERVER_INDONESIA || 'https://video-indo.example.com';
+const VIDEO_SERVER_ENGLISH = process.env.VIDEO_SERVER_ENGLISH || 'https://video-eng.example.com';
+
+// MyAnimeList API configuration
+const MAL_API_URL = process.env.MAL_API_URL || 'https://api.myanimelist.net/v2';
+const MAL_CLIENT_ID = process.env.MAL_CLIENT_ID || '';
+
 if (!JWT_SECRET) {
   console.error('JWT_SECRET environment variable is required in production');
   process.exit(1);
@@ -956,6 +965,92 @@ app.put('/api/profile', authenticateToken, upload.single('profile_photo'), async
   } catch (err) {
     console.error('Profile update error:', err);
     res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// External Video Server API
+app.get('/api/external-video/:animeId/:episodeId', async (req, res) => {
+  try {
+    const { animeId, episodeId } = req.params;
+    const { server = 'indonesia' } = req.query;
+    
+    // Select the appropriate video server based on language preference
+    const videoServer = server === 'english' ? VIDEO_SERVER_ENGLISH : VIDEO_SERVER_INDONESIA;
+    
+    // In a real implementation, this would fetch from the external video server
+    // For now, return a mock response
+    const videoData = {
+      anime_id: parseInt(animeId),
+      episode_id: parseInt(episodeId),
+      video_url: `${videoServer}/${animeId}/${episodeId}/index.m3u8`,
+      video_url_360p: `${videoServer}/${animeId}/${episodeId}/360p.m3u8`,
+      video_url_480p: `${videoServer}/${animeId}/${episodeId}/480p.m3u8`,
+      video_url_720p: `${videoServer}/${animeId}/${episodeId}/720p.m3u8`,
+      video_url_1080p: `${videoServer}/${animeId}/${episodeId}/1080p.m3u8`,
+      server: server,
+      subtitles: {
+        indonesia: `${videoServer}/${animeId}/${episodeId}/subtitles/id.vtt`,
+        english: `${videoServer}/${animeId}/${episodeId}/subtitles/en.vtt`
+      }
+    };
+    
+    res.json(videoData);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch video from external server' });
+  }
+});
+
+// MyAnimeList API Integration
+app.get('/api/mal/anime/:malId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { malId } = req.params;
+    
+    if (!MAL_CLIENT_ID) {
+      return res.status(500).json({ error: 'MAL_CLIENT_ID not configured' });
+    }
+    
+    const response = await fetch(`${MAL_API_URL}/anime/${malId}?fields=id,title,synopsis,genres,mean,rank,popularity,num_episodes,status,studios,images,start_date,end_date`, {
+      headers: {
+        'X-MAL-CLIENT-ID': MAL_CLIENT_ID
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch from MyAnimeList API');
+    }
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Error fetching from MAL:', err);
+    res.status(500).json({ error: 'Failed to fetch anime data from MyAnimeList' });
+  }
+});
+
+app.get('/api/mal/search/:query', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { query } = req.params;
+    const { limit = 10 } = req.query;
+    
+    if (!MAL_CLIENT_ID) {
+      return res.status(500).json({ error: 'MAL_CLIENT_ID not configured' });
+    }
+    
+    const response = await fetch(`${MAL_API_URL}/anime?q=${encodeURIComponent(query)}&limit=${limit}&fields=id,title,synopsis,genres,mean,rank,popularity,num_episodes,status,studios,images`, {
+      headers: {
+        'X-MAL-CLIENT-ID': MAL_CLIENT_ID
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to search MyAnimeList API');
+    }
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Error searching MAL:', err);
+    res.status(500).json({ error: 'Failed to search MyAnimeList' });
   }
 });
 

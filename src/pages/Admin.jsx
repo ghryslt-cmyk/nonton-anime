@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Feather, Upload, Film, Users, Settings, LogOut, Plus, Edit, Trash2, Flag, Check, X as XIcon, Calendar } from 'lucide-react'
+import { Feather, Upload, Film, Users, Settings, LogOut, Plus, Edit, Trash2, Flag, Check, X as XIcon, Calendar, Search, Database } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { animeAPI, userAPI, settingsAPI, authAPI, reportsAPI } from '../services/api'
 
@@ -42,6 +42,9 @@ export default function Admin() {
   const [reports, setReports] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [malSearchQuery, setMalSearchQuery] = useState('')
+  const [malSearchResults, setMalSearchResults] = useState([])
+  const [malSearchLoading, setMalSearchLoading] = useState(false)
 
   useEffect(() => {
     const user = authAPI.getCurrentUser()
@@ -271,6 +274,45 @@ export default function Admin() {
     }
   }
 
+  const handleMALSearch = async (e) => {
+    e.preventDefault()
+    if (!malSearchQuery.trim()) return
+    
+    setMalSearchLoading(true)
+    try {
+      const results = await reportsAPI.searchMAL(malSearchQuery, 10)
+      setMalSearchResults(results.data || [])
+    } catch (err) {
+      alert('Failed to search MyAnimeList')
+      console.error('Error:', err)
+    } finally {
+      setMalSearchLoading(false)
+    }
+  }
+
+  const handleImportFromMAL = async (malAnime) => {
+    try {
+      const animeData = {
+        title: malAnime.title,
+        description: malAnime.synopsis || '',
+        genres: malAnime.genres?.map(g => g.name).join(', ') || '',
+        year: malAnime.start_date?.split('-')[0] || '',
+        episodes: malAnime.num_episodes || '',
+        status: malAnime.status === 'Currently Airing' ? 'Ongoing' : malAnime.status === 'Finished Airing' ? 'Completed' : 'Upcoming',
+        image_url: malAnime.images?.jpg?.image_url || ''
+      }
+      
+      await animeAPI.create(animeData)
+      alert('Anime imported successfully!')
+      loadAnimeList()
+      setMalSearchResults([])
+      setMalSearchQuery('')
+    } catch (err) {
+      alert('Failed to import anime')
+      console.error('Error:', err)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
@@ -331,6 +373,15 @@ export default function Admin() {
               >
                 <Calendar className="w-4 h-4 md:w-5 h-5" />
                 Jadwal Rilis
+              </button>
+              <button
+                onClick={() => setActiveTab('mal')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm md:text-base ${
+                  activeTab === 'mal' ? 'bg-purple-600' : 'hover:bg-slate-700'
+                }`}
+              >
+                <Database className="w-4 h-4 md:w-5 h-5" />
+                MyAnimeList
               </button>
               <button
                 onClick={() => setActiveTab('settings')}
@@ -852,6 +903,73 @@ export default function Admin() {
                     <p className="text-gray-400 text-center py-8">Tidak ada anime ongoing</p>
                   )}
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'mal' && (
+              <div className="bg-slate-800 rounded-lg p-6 md:p-8">
+                <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Database className="w-5 h-5 md:w-6 h-6" />
+                  MyAnimeList Integration
+                </h2>
+                
+                {/* Search Form */}
+                <form onSubmit={handleMALSearch} className="mb-6">
+                  <div className="flex gap-4">
+                    <input
+                      type="text"
+                      value={malSearchQuery}
+                      onChange={(e) => setMalSearchQuery(e.target.value)}
+                      placeholder="Search anime on MyAnimeList..."
+                      className="flex-1 bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                    />
+                    <button
+                      type="submit"
+                      disabled={malSearchLoading}
+                      className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition text-sm flex items-center gap-2"
+                    >
+                      <Search className="w-4 h-4" />
+                      {malSearchLoading ? 'Searching...' : 'Search'}
+                    </button>
+                  </div>
+                </form>
+
+                {/* Search Results */}
+                {malSearchResults.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Search Results</h3>
+                    {malSearchResults.map((anime) => (
+                      <div key={anime.node?.id || anime.id} className="bg-slate-700 rounded-lg p-4 flex gap-4">
+                        <img
+                          src={anime.node?.images?.jpg?.image_url || anime.images?.jpg?.image_url}
+                          alt={anime.node?.title || anime.title}
+                          className="w-20 h-28 object-cover rounded"
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-lg mb-2">{anime.node?.title || anime.title}</h4>
+                          <p className="text-sm text-gray-400 mb-2 line-clamp-2">
+                            {anime.node?.synopsis || anime.synopsis}
+                          </p>
+                          <div className="flex gap-2 text-xs text-gray-400 mb-3">
+                            <span>Score: {anime.node?.mean || anime.mean || 'N/A'}</span>
+                            <span>Episodes: {anime.node?.num_episodes || anime.num_episodes || 'N/A'}</span>
+                            <span>Status: {anime.node?.status || anime.status}</span>
+                          </div>
+                          <button
+                            onClick={() => handleImportFromMAL(anime.node || anime)}
+                            className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition text-sm"
+                          >
+                            Import to Database
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {malSearchQuery && malSearchResults.length === 0 && !malSearchLoading && (
+                  <p className="text-gray-400 text-center py-8">No results found</p>
+                )}
               </div>
             )}
 
