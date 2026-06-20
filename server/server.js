@@ -8,7 +8,6 @@ const path = require('path');
 const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const cron = require('node-cron');
 const Joi = require('joi');
 const validator = require('validator');
 
@@ -987,137 +986,8 @@ app.put('/api/settings', authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
-// Automatic Schedule Update System
-const getNextDayOfWeek = (dayName) => {
-  const days = {
-    'Senin': 1,
-    'Selasa': 2,
-    'Rabu': 3,
-    'Kamis': 4,
-    'Jumat': 5,
-    'Sabtu': 6,
-    'Minggu': 0
-  };
-  const targetDay = days[dayName];
-  const today = new Date();
-  const currentDay = today.getDay();
-  const daysUntilTarget = (targetDay - currentDay + 7) % 7;
-  
-  if (daysUntilTarget === 0) {
-    // If today is the target day, return next week's target day
-    return new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-  }
-  
-  return new Date(today.getTime() + daysUntilTarget * 24 * 60 * 60 * 1000);
-};
-
-const updateAnimeSchedules = async () => {
-  try {
-    console.log('Running automatic schedule update...');
-    
-    // Get all ongoing anime
-    const result = await pool.query(`
-      SELECT id, title, release_day, next_episode_date, next_episode_number 
-      FROM anime 
-      WHERE status = 'Ongoing' 
-      AND release_day IS NOT NULL
-    `);
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    for (const anime of result.rows) {
-      if (!anime.next_episode_date) continue;
-      
-      const nextEpisodeDate = new Date(anime.next_episode_date);
-      nextEpisodeDate.setHours(0, 0, 0, 0);
-      
-      // If the next episode date has passed, update to the next occurrence
-      if (nextEpisodeDate <= today) {
-        const newNextDate = getNextDayOfWeek(anime.release_day);
-        const newEpisodeNumber = (anime.next_episode_number || 0) + 1;
-        
-        await pool.query(
-          `UPDATE anime SET next_episode_date = $1, next_episode_number = $2 WHERE id = $3`,
-          [newNextDate.toISOString().split('T')[0], newEpisodeNumber, anime.id]
-        );
-        
-        console.log(`Updated schedule for ${anime.title}: Next episode ${newEpisodeNumber} on ${newNextDate.toISOString().split('T')[0]}`);
-      }
-    }
-    
-    console.log('Automatic schedule update completed');
-  } catch (error) {
-    console.error('Error updating schedules:', error);
-  }
-};
-
-// Run schedule update every day at midnight
-// cron.schedule('0 0 * * *', updateAnimeSchedules);
-
-// Automatic Episode Release System
-const publishScheduledEpisodes = async () => {
-  try {
-    console.log('Checking for scheduled episodes to publish...');
-    
-    const now = new Date();
-    
-    // Find all scheduled episodes that should be published
-    const result = await pool.query(`
-      SELECT e.*, a.title as anime_title 
-      FROM episodes e
-      JOIN anime a ON e.anime_id = a.id
-      WHERE e.is_published = false 
-      AND e.scheduled_release IS NOT NULL
-      AND e.scheduled_release <= $1
-    `, [now]);
-    
-    for (const episode of result.rows) {
-      await pool.query(
-        'UPDATE episodes SET is_published = true WHERE id = $1',
-        [episode.id]
-      );
-      
-      console.log(`Published episode ${episode.episode_number} of ${episode.anime_title}`);
-    }
-    
-    if (result.rows.length > 0) {
-      console.log(`Published ${result.rows.length} scheduled episodes`);
-    }
-  } catch (error) {
-    console.error('Error publishing scheduled episodes:', error);
-  }
-};
-
-// Run episode publish check every minute
-// cron.schedule('* * * * *', publishScheduledEpisodes);
-
-// Initialize cron jobs after database is ready
-const initializeCronJobs = async () => {
-  try {
-    // Wait a bit to ensure database is fully initialized
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    
-    console.log('Initializing cron jobs...');
-    
-    // Schedule update every day at midnight
-    // cron.schedule('0 0 * * *', updateAnimeSchedules);
-    console.log('Schedule update cron job disabled for now');
-    
-    // Episode publish check every minute
-    // cron.schedule('* * * * *', publishScheduledEpisodes);
-    console.log('Episode publish cron job disabled for now');
-    
-  } catch (error) {
-    console.error('Error initializing cron jobs:', error);
-  }
-};
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log('Connected to PostgreSQL database');
-  
-  // Initialize cron jobs after server starts
-  initializeCronJobs();
 });
