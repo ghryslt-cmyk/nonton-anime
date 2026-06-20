@@ -236,6 +236,16 @@ async function initializeDatabase() {
       )
     `);
 
+    // Add new columns to anime table if they don't exist
+    try {
+      await pool.query(`ALTER TABLE anime ADD COLUMN IF NOT EXISTS release_day TEXT`);
+      await pool.query(`ALTER TABLE anime ADD COLUMN IF NOT EXISTS next_episode_date DATE`);
+      await pool.query(`ALTER TABLE anime ADD COLUMN IF NOT EXISTS next_episode_number INTEGER`);
+      console.log('Anime table columns updated');
+    } catch (err) {
+      console.log('Anime table columns update check:', err.message);
+    }
+
     // Episodes table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS episodes (
@@ -257,6 +267,19 @@ async function initializeDatabase() {
         FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE
       )
     `);
+
+    // Add new columns to episodes table if they don't exist
+    try {
+      await pool.query(`ALTER TABLE episodes ADD COLUMN IF NOT EXISTS video_url_360p TEXT`);
+      await pool.query(`ALTER TABLE episodes ADD COLUMN IF NOT EXISTS video_url_480p TEXT`);
+      await pool.query(`ALTER TABLE episodes ADD COLUMN IF NOT EXISTS video_url_720p TEXT`);
+      await pool.query(`ALTER TABLE episodes ADD COLUMN IF NOT EXISTS video_url_1080p TEXT`);
+      await pool.query(`ALTER TABLE episodes ADD COLUMN IF NOT EXISTS scheduled_release TIMESTAMP`);
+      await pool.query(`ALTER TABLE episodes ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT false`);
+      console.log('Episodes table columns updated');
+    } catch (err) {
+      console.log('Episodes table columns update check:', err.message);
+    }
 
     // Reviews table
     await pool.query(`
