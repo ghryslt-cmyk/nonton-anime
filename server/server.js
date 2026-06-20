@@ -1054,6 +1054,71 @@ app.get('/api/mal/search/:query', authenticateToken, requireAdmin, async (req, r
   }
 });
 
+// Automatic Video Sync from External Server
+app.post('/api/sync-videos', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    // Get all ongoing anime
+    const animeResult = await pool.query(`
+      SELECT * FROM anime 
+      WHERE status = 'Ongoing'
+    `);
+    
+    let syncedCount = 0;
+    
+    for (const anime of animeResult.rows) {
+      // In a real implementation, this would fetch from the external video server
+      // For now, we'll simulate the sync process
+      
+      // Check external video server for new episodes
+      const videoServer = VIDEO_SERVER_INDONESIA;
+      const externalEpisodes = await fetch(`${videoServer}/${anime.id}/episodes`)
+        .then(res => res.json())
+        .catch(() => ({ episodes: [] }));
+      
+      if (externalEpisodes.episodes) {
+        for (const extEp of externalEpisodes.episodes) {
+          // Check if episode already exists in database
+          const existingEp = await pool.query(
+            'SELECT id FROM episodes WHERE anime_id = $1 AND episode_number = $2',
+            [anime.id, extEp.episode_number]
+          );
+          
+          if (existingEp.rows.length === 0) {
+            // Add new episode to database
+            await pool.query(
+              `INSERT INTO episodes (anime_id, episode_number, title, video_url, video_url_360p, video_url_480p, video_url_720p, video_url_1080p, video_platform, is_published)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+              [
+                anime.id,
+                extEp.episode_number,
+                extEp.title || `Episode ${extEp.episode_number}`,
+                extEp.video_url || `${videoServer}/${anime.id}/${extEp.episode_number}/index.m3u8`,
+                extEp.video_url_360p || `${videoServer}/${anime.id}/${extEp.episode_number}/360p.m3u8`,
+                extEp.video_url_480p || `${videoServer}/${anime.id}/${extEp.episode_number}/480p.m3u8`,
+                extEp.video_url_720p || `${videoServer}/${anime.id}/${extEp.episode_number}/720p.m3u8`,
+                extEp.video_url_1080p || `${videoServer}/${anime.id}/${extEp.episode_number}/1080p.m3u8`,
+                'other',
+                false // Not published until scheduled time
+              ]
+            );
+            
+            syncedCount++;
+            console.log(`Synced episode ${extEp.episode_number} for ${anime.title}`);
+          }
+        }
+      }
+    }
+    
+    res.json({
+      message: 'Video sync completed',
+      synced_episodes: syncedCount
+    });
+  } catch (err) {
+    console.error('Error syncing videos:', err);
+    res.status(500).json({ error: 'Failed to sync videos' });
+  }
+});
+
 // Settings Routes
 app.get('/api/settings', authenticateToken, requireAdmin, async (req, res) => {
   try {
